@@ -30,22 +30,22 @@
 
     • MS Reservas
 
-| HTTP METHOD                   | PATCH                                                   | DESCRIPTION                                             |
-| ----------------------------- | ------------------------------------------------------- | ------------------------------------------------------- |
-| POST                          | /api/v1/booking                                         | (Realizar reserva)                                      |
-| PUT                           | /api/v1/booking                                         |                                                         |
-| PAT                           | /api/v1/booking                                         |                                                         |
-| GET                           | /api/v1/booking                                         | (Obter todos as reservas, disponíveis ou indisponíveis) |
-| GET:/api/v1/booking/available | (Obter todas as reservas disponíveis)                   |
-| GET                           | /api/v1/booking/available/{Id}                          | (Obter todas as reservas disponíveis por Id)            |
-| GET                           | /api/v1/booking/reserved                                | (Obter todas as reservas indisponíveis)                 |
-| GET                           | /api/v1/booking/reserved/{Id}                           | (Obter todas as reservas indisponíveis por Id)          |
-| GET                           | /api/v1/booking/{city}                                  | (Obter Reserva com parâmetros)                          |
-| GET                           | /api/v1/booking/available/{city}?{lowerDate=2023-06-27} | (Obter Reserva por menor data - Obrigatório)            |
-| GET                           | /api/v1/booking/available/{city}?{upperDate=2023-09-30} | (Obter Reserva por maior data - Opcional)               |
-| GET                           | /api/v1/booking/available/{city}?{lowerHour=HH-MM-ss}   | (Obter Reserva por menor hora - Opcional)               |
-| GET                           | /api/v1/booking/available/{city}?{upperHour=HH-MM-ss}   | (Obter Reserva por maior hora - Opcional)               |
-| DEL                           | /api/v1/booking/{Id}                                    | (Deletar Reserva)                                       |
+| HTTP METHOD | PATCH                                                   | DESCRIPTION                                             |
+| ----------- | ------------------------------------------------------- | ------------------------------------------------------- |
+| POST        | /api/v1/booking                                         | (Realizar reserva)                                      |
+| PUT         | /api/v1/booking                                         |                                                         |
+| PAT         | /api/v1/booking                                         |                                                         |
+| GET         | /api/v1/booking                                         | (Obter todos as reservas, disponíveis ou indisponíveis) |
+| GET         | /api/v1/booking/available                               | (Obter todas as reservas disponíveis)                   |
+| GET         | /api/v1/booking/available/{Id}                          | (Obter todas as reservas disponíveis por Id)            |
+| GET         | /api/v1/booking/reserved                                | (Obter todas as reservas indisponíveis)                 |
+| GET         | /api/v1/booking/reserved/{Id}                           | (Obter todas as reservas indisponíveis por Id)          |
+| GET         | /api/v1/booking/{city}                                  | (Obter Reserva com parâmetros)                          |
+| GET         | /api/v1/booking/available/{city}?{lowerDate=2023-06-27} | (Obter Reserva por menor data - Obrigatório)            |
+| GET         | /api/v1/booking/available/{city}?{upperDate=2023-09-30} | (Obter Reserva por maior data - Opcional)               |
+| GET         | /api/v1/booking/available/{city}?{lowerHour=HH-MM-ss}   | (Obter Reserva por menor hora - Opcional)               |
+| GET         | /api/v1/booking/available/{city}?{upperHour=HH-MM-ss}   | (Obter Reserva por maior hora - Opcional)               |
+| DEL         | /api/v1/booking/{Id}                                    | (Deletar Reserva)                                       |
  
     • MS Aeroporto (Acesso restrito - Gerenciamento do aeroporto)
 
