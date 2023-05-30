@@ -1,8 +1,8 @@
-# Sky Aviator Company - Back-end
+# Sky Aviator Airlines
 
 ## - API Demo:
 
-(Adicionar Swagger Depois)
+(Add Swagger Documentation After)
 
     • MS Contas (Gerenciamento do sistema)
 
