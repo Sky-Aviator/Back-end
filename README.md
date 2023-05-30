@@ -1,6 +1,49 @@
 # Sky Aviator Airlines
 
-## - API Demo:
+## Microservices:
+
+| Microservice   | PORT |
+| -------------- | ---- |
+| config-server  | 9090 |
+| api-gateway    | 9091 |
+| eureka-service | 9092 |
+| ms-users       | 9093 |
+
+## Spring Cloud API Gateway:
+
+An API Gateway is a centralized entry point for all API calls in a microservices architecture. It acts as a reverse proxy that receives requests from clients, routes them to the appropriate services, and manages the communication between clients and microservices.
+
+The API Gateway provides several important functionalities, such as authentication, authorization, load balancing, caching, data transformation, routing, and more. It helps simplify the microservices architecture by providing a single entry point for APIs and centralizing common API management logic.
+
+Additionally, the API Gateway also acts as a security layer, protecting the underlying microservices by exposing only authorized APIs and validating client requests.
+
+>URI: http://localhost:9091
+
+Register the microservices.
+
+The route to "ms-users" microservice for example:
+
+>http://localhost:9091/ms-users/users/hello
+
+This must return a string "Hello, ms-users".
+
+## Discovery Service:
+
+Eureka-service is our Discovery Service.
+
+A Discovery Service is a fundamental component in a microservices architecture. It plays the role of registering and tracking information about the available services in the infrastructure. The Discovery Service allows microservices to automatically register themselves and provide details about their location, such as IP address, port, version, etc. It also enables other services to dynamically find and access the required services without needing to know the specific location information of each service.
+
+A famous Discovery Service is Eureka, provided by Spring Cloud Netflix. It allows services to register and discover each other using logical names, making scalability and resilience easier to achieve in a microservices architecture.
+
+URI: http://localhost:9092/eureka
+
+## Ms-Users:
+
+"ms-users" is our user microservice;
+
+>URI: http://localhost:9093
+
+### - API Demo:
 
 (Add Swagger Documentation After)
 
