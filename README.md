@@ -1,5 +1,9 @@
 # Sky Aviator Airlines
 
+## Overview:
+
+![Overview](https://github.com/Sky-Aviator/System-Design/blob/4cb9eea1840d75f29ca09dea8d4904af8af23b13/IMAGE/Sky%20Aviator%20-%20System%20Design%20V1.0.jpg)
+
 ## Microservices:
 
 | Microservice   | PORT |
@@ -8,6 +12,14 @@
 | api-gateway    | 9091 |
 | eureka-service | 9092 |
 | ms-users       | 9093 |
+| ms-booking     | 9094 |
+
+## Database:
+
+| Service   | Host    | Port |
+| --------- | ------- | ---- |
+| MySQL     |localhost| 3306 |
+| Redis     |127.0.0.1| 6379 |
 
 ## Spring Cloud API Gateway:
 
@@ -35,7 +47,7 @@ A Discovery Service is a fundamental component in a microservices architecture. 
 
 A famous Discovery Service is Eureka, provided by Spring Cloud Netflix. It allows services to register and discover each other using logical names, making scalability and resilience easier to achieve in a microservices architecture.
 
-URI: http://localhost:9092/eureka
+>URI: http://localhost:9092/eureka
 
 ## Ms-Users:
 
