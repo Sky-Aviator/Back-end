@@ -2,7 +2,7 @@
 
 ## Overview:
 
-![Overview](https://github.com/Sky-Aviator/System-Design/blob/4cb9eea1840d75f29ca09dea8d4904af8af23b13/IMAGE/Sky%20Aviator%20-%20System%20Design%20V1.0.jpg)
+![Overview](https://github.com/Sky-Aviator/System-Design/blob/f34929980d3a0e6ec59944fb337df7b25124ab55/IMAGE/Sky%20Aviator%20-%20System%20Design%20-%20V1.1.jpg)
 
 ## Microservices:
 
