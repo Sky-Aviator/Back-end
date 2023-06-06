@@ -2,7 +2,7 @@
 
 ## Overview:
 
-![Overview](https://github.com/Sky-Aviator/System-Design/blob/4cb9eea1840d75f29ca09dea8d4904af8af23b13/IMAGE/Sky%20Aviator%20-%20System%20Design%20V1.0.jpg)
+![Overview](System-Design/Sky%20Aviator%20-%20System%20Design%20-%20V1.2.jpg)
 
 ## Microservices:
 
@@ -18,8 +18,9 @@
 
 | Service   | Host    | Port |
 | --------- | ------- | ---- |
-| MySQL     |localhost| 3306 |
 | Redis     |127.0.0.1| 6379 |
+| MySQL     |localhost| 3306 |
+| MongoDB   |localhost| 27017|
 
 ## Spring Cloud API Gateway:
 
@@ -35,9 +36,9 @@ Register the microservices.
 
 The route to "ms-users" microservice for example:
 
->http://localhost:9091/ms-users/users/hello
+>http://localhost:9091/ms-users/api/v1/users
 
-This must return a string "Hello, ms-users".
+This should return all registered users.
 
 ## Discovery Service:
 
@@ -55,7 +56,7 @@ A famous Discovery Service is Eureka, provided by Spring Cloud Netflix. It allow
 
 >URI: http://localhost:9093
 
-### - API Demo:
+### - Endpoints Demo:
 
 (Add Swagger Documentation After)
 

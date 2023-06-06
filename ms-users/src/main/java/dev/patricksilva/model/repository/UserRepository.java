@@ -1,10 +1,9 @@
 package dev.patricksilva.model.repository;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.data.mongodb.repository.MongoRepository;
 
 import dev.patricksilva.model.entities.User;
 
-@EnableJpaRepositories
-public interface UserRepository extends JpaRepository<User, Long> {
+public interface UserRepository extends MongoRepository<User, String>{
+	boolean existsByEmail(String email);
 }

@@ -1,11 +1,14 @@
 package dev.patricksilva.view;
 
 public class UserResponse {
-	private Long id;
+	private String id;
 	private String firstName;
 	private String lastName;
 	private String cpf;
 	private String card;
+	private String cardMonth;
+	private String cardYear;
+	private String cardCv;
 	private String date;
 	private String sex;
 	private String phone;
@@ -13,11 +16,11 @@ public class UserResponse {
 	private String password;
 
 	// Getters and Setters
-	public Long getId() {
+	public String getId() {
 		return id;
 	}
 
-	public void setId(Long id) {
+	public void setId(String id) {
 		this.id = id;
 	}
 
@@ -91,5 +94,29 @@ public class UserResponse {
 
 	public void setPassword(String password) {
 		this.password = password;
+	}
+
+	public String getCardMonth() {
+		return cardMonth;
+	}
+
+	public void setCardMonth(String cardMonth) {
+		this.cardMonth = cardMonth;
+	}
+
+	public String getCardYear() {
+		return cardYear;
+	}
+
+	public void setCardYear(String cardYear) {
+		this.cardYear = cardYear;
+	}
+
+	public String getCardCv() {
+		return cardCv;
+	}
+
+	public void setCardCv(String cardCv) {
+		this.cardCv = cardCv;
 	}
 }

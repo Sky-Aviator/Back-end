@@ -1,9 +1,13 @@
 package dev.patricksilva.model.services;
 
+import java.beans.PropertyDescriptor;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,6 +15,7 @@ import dev.patricksilva.model.dtos.UserDto;
 import dev.patricksilva.model.entities.User;
 import dev.patricksilva.model.exception.ResourceNotFoundException;
 import dev.patricksilva.model.repository.UserRepository;
+import jakarta.validation.Valid;
 
 @Service
 public class UserServiceImpl {
@@ -19,56 +24,54 @@ public class UserServiceImpl {
 	private UserRepository userRepository;
 
 	/**
-	 * Find all users present in the database.
+	 * Retrieves all users present in the database.
 	 * 
-	 * @return It will find all users in the database.
+	 * @return List<UserDto> - A list containing all users in the database.
 	 */
 	public List<UserDto> findAll() {
 		List<User> users = userRepository.findAll();
-
 		return users.stream().map(user -> new ModelMapper().map(user, UserDto.class)).toList();
 	}
 
 	/**
-	 * Find user by id.
+	 * Retrieves a user by their ID.
 	 * 
-	 * @param id
-	 * @return Will find user by id.
+	 * @param id - The ID of the user.
+	 * @return UserDto - The user with the specified ID.
+	 * @throws ResourceNotFoundException if the user does not exist.
 	 */
-	public Optional<UserDto> findById(Long id) {
-		Optional<User> user = userRepository.findById(id);
-
-		if (user.isEmpty())
-			throw new ResourceNotFoundException("Id: " + id + " not found!");
-
-		UserDto dto = new ModelMapper().map(user.get(), UserDto.class);
-		return Optional.of(dto);
+	public UserDto findById(@Valid String id) {
+		User user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Id: " + id + " não encontrado!"));
+		return new ModelMapper().map(user, UserDto.class);
 	}
 
 	/**
-	 * Add a new user to the database.
+	 * Adds a new user to the database.
 	 * 
-	 * @param userDto the user data to add
-	 * @return the added UserDto with assigned ID
+	 * @param userDto - The user data to add.
+	 * @return UserDto - The added user with assigned ID.
+	 * @throws IllegalArgumentException if the user already exists in the system.
 	 */
-	public UserDto addUser(UserDto userDto) {
-		userDto.setId(null);
+	public UserDto addUser(@Valid UserDto userDto) {
+		if (userRepository.existsByEmail(userDto.getEmail())) {
+			throw new IllegalArgumentException("O Usuário já existe no sistema!");
+		}
 		ModelMapper mapper = new ModelMapper();
 		User user = mapper.map(userDto, User.class);
 		user = userRepository.save(user);
 		userDto.setId(user.getId());
-
+		
 		return userDto;
 	}
 
 	/**
-	 * Delete a user by ID.
+	 * Deletes a user by their ID.
 	 * 
-	 * @param id the ID of the user to delete
-	 * @throws ResourceNotFoundException if the user does not exist
+	 * @param id - The ID of the user to delete.
+	 * @throws ResourceNotFoundException if the user does not exist.
 	 */
-	public void delete(Long id) {
-		if(!userRepository.existsById(id)) {
+	public void deleteUser(@Valid String id) {
+		if (!userRepository.existsById(id)) {
 			throw new ResourceNotFoundException("Não pode deletar este Usuário com ID: " + id + ", pois o Usuário não existe!");
 		}
 		userRepository.deleteById(id);
@@ -77,20 +80,56 @@ public class UserServiceImpl {
 	/**
 	 * Update a user by ID.
 	 * 
-	 * @param id : the ID of the user to update
-	 * @param userDto : the updated user data
+	 * @param id      the ID of the user to update
+	 * @param userDto the updated user data
 	 * @return the updated UserDto
 	 * @throws ResourceNotFoundException if the user does not exist
 	 */
-	public UserDto update(Long id, UserDto userDto) {
+	public UserDto updateUser(@Valid String id, UserDto userDto) {
 		if (!userRepository.existsById(id)) {
-	        throw new ResourceNotFoundException("Nao pode atualizar este Usuário de ID: " + id + ", pois este Usuário não existe!");
-	    }
+			throw new ResourceNotFoundException("Nao pode atualizar este Usuário de ID: " + id + ", pois este Usuário não existe!");
+		}
 		userDto.setId(id);
 		ModelMapper mapper = new ModelMapper();
 		User user = mapper.map(userDto, User.class);
 		userRepository.save(user);
-
+		
 		return userDto;
+	}
+
+	/**
+	 * Partially update a user by ID.
+	 *
+	 * @param id      the ID of the user to update
+	 * @param userDto the updated user data
+	 * @return the updated UserDto
+	 * @throws ResourceNotFoundException if the user does not exist
+	 */
+	public UserDto partialUpdate(@Valid String id, UserDto userDto) {
+		if (!userRepository.existsById(id)) {
+			throw new ResourceNotFoundException("Não é possível atualizar o usuário com ID: " + id + ", porque o usuário não existe!");
+		}
+		User existingUser = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Id: " + id + " não encontrado!"));
+		// Copiar apenas as propriedades não nulas de userDto para existingUser.
+		BeanUtils.copyProperties(userDto, existingUser, getNullPropertyNames(userDto));
+		User updatedUser = userRepository.save(existingUser);
+		ModelMapper mapper = new ModelMapper();
+		
+		return mapper.map(updatedUser, UserDto.class);
+	}
+
+	/**
+	 * Retrieves the names of null properties from an object.
+	 * @param source - The source object.
+	 * @return String[] - An array of names of null properties.
+	 */
+	private String[] getNullPropertyNames(Object source) {
+		final BeanWrapper src = new BeanWrapperImpl(source);
+		PropertyDescriptor[] descriptors = src.getPropertyDescriptors();
+		List<String> nullProperties = Arrays.stream(descriptors)
+				.filter(descriptor -> src.getPropertyValue(descriptor.getName()) == null)
+				.map(PropertyDescriptor::getName).toList();
+
+		return nullProperties.toArray(new String[0]);
 	}
 }

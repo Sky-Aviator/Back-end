@@ -1,7 +1,6 @@
 package dev.patricksilva.controllers;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,21 +20,21 @@ import dev.patricksilva.model.dtos.UserDto;
 import dev.patricksilva.model.services.UserServiceImpl;
 import dev.patricksilva.view.UserRequest;
 import dev.patricksilva.view.UserResponse;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/v1/users")
 public class UserController {
 
-	/**
-	 * Dependency injection
-	 */
+	// Dependency Injection
 	@Autowired
 	private UserServiceImpl userServiceImpl;
 
 	/**
-	 * Method responsible for finding all users.
+	 * Method responsible for retrieving all users.
 	 * 
-	 * @return
+	 * @return ResponseEntity<List<UserResponse>> - An HTTP response containing the
+	 *         list of users found.
 	 */
 	@GetMapping
 	public ResponseEntity<List<UserResponse>> findAllUsers() {
@@ -47,85 +46,94 @@ public class UserController {
 	}
 
 	/**
-	 * Method responsible for finding user by Id ("{/id}").
+	 * Method responsible for finding a user by their ID ("/{id}").
 	 * 
-	 * @param id
-	 * @return
+	 * @param id - The ID of the user to be retrieved.
+	 * @return ResponseEntity<UserResponse> - An HTTP response containing the user
+	 *         found, or a "Not Found" status if no user is found.
 	 */
 	@GetMapping("/{id}")
-	public ResponseEntity<Optional<UserResponse>> findUserById(@PathVariable Long id) {
-		Optional<UserDto> userDto = userServiceImpl.findById(id);
-		if (!userDto.isPresent()) {
-			return new ResponseEntity<>(Optional.empty(), HttpStatus.NOT_FOUND);
-		} else {
-			UserResponse user = new ModelMapper().map(userDto.get(), UserResponse.class);
-			return new ResponseEntity<>(Optional.of(user), HttpStatus.OK);
+	public ResponseEntity<UserResponse> findUserById(@Valid @PathVariable String id) {
+		UserDto userDto = userServiceImpl.findById(id);
+		if (userDto != null) {
+			ModelMapper mapper = new ModelMapper();
+			UserResponse user = mapper.map(userDto, UserResponse.class);
+			return new ResponseEntity<>(user, HttpStatus.OK);
 		}
+		
+		return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 	}
 
 	/**
 	 * Method responsible for registering a new user in the database ("/register").
 	 * 
-	 * @param userRequest
-	 * @return
+	 * @param userRequest - The user data to be registered.
+	 * 
+	 * @return ResponseEntity<UserResponse> - An HTTP response containing the
+	 *         created user and a "Created" status.
 	 */
 	@PostMapping("/register")
-	public ResponseEntity<UserResponse> createUser(@RequestBody UserRequest userRequest) {
+	public ResponseEntity<UserResponse> createUser(@Valid @RequestBody UserRequest userRequest) {
 		ModelMapper mapper = new ModelMapper();
 		UserDto userDto = mapper.map(userRequest, UserDto.class);
 		userDto = userServiceImpl.addUser(userDto);
-
+		
 		return new ResponseEntity<>(mapper.map(userDto, UserResponse.class), HttpStatus.CREATED);
 	}
 
 	/**
-	 * Method responsible for updating a new user by id in the database
+	 * Method responsible for updating a user by their ID in the database
 	 * ("/register/{id}").
 	 * 
-	 * @param userRequest
-	 * @param id
-	 * @return Will return an updated user
+	 * @param userRequest - The updated user data.
+	 * 
+	 * @param id          - The ID of the user to be updated.
+	 * 
+	 * @return ResponseEntity<UserResponse> - An HTTP response containing the
+	 *         updated user and an "OK" status.
 	 */
 	@PutMapping("/register/{id}")
-	public ResponseEntity<UserResponse> putUser(@RequestBody UserRequest userRequest, @PathVariable Long id) {
+	public ResponseEntity<UserResponse> updateUser(@Valid @RequestBody UserRequest userRequest, @PathVariable String id) {
 		ModelMapper mapper = new ModelMapper();
 		UserDto userDto = mapper.map(userRequest, UserDto.class);
-		userDto = userServiceImpl.update(id, userDto);
-
+		userDto = userServiceImpl.updateUser(id, userDto);
+		
 		return new ResponseEntity<>(mapper.map(userDto, UserResponse.class), HttpStatus.OK);
 	}
 
 	/**
-	 * Method responsible for updating part of a new user by id in the database
+	 * Method responsible for updating part of a user by their ID in the database
 	 * ("/register/{id}").
 	 * 
-	 * @param userRequest
-	 * @param id
-	 * @return Will return an updated user
+	 * @param id      - The ID of the user to be updated.
+	 * @param userDto - The updated user data.
+	 * @return ResponseEntity<UserDto> - An HTTP response containing the updated
+	 *         user and an "OK" status.
 	 */
 	@PatchMapping("/register/{id}")
-	public ResponseEntity<UserResponse> partialUserUpdate(@RequestBody UserRequest userRequest, @PathVariable Long id) {
-		ModelMapper mapper = new ModelMapper();
-		UserDto userDto = mapper.map(userRequest, UserDto.class);
-		userDto = userServiceImpl.update(id, userDto);
-
-		return new ResponseEntity<>(mapper.map(userDto, UserResponse.class), HttpStatus.OK);
+	public ResponseEntity<UserDto> partialUpdateUser(@PathVariable("id") String id, @RequestBody @Valid UserDto userDto) {
+		UserDto updatedUser = userServiceImpl.partialUpdate(id, userDto);
+		
+		return ResponseEntity.ok(updatedUser);
 	}
 
 	/**
-	 * Method responsible for deleting a user by id in the database ("/{id}").
+	 * Method responsible for deleting a user by their ID in the database ("/{id}").
 	 * 
-	 * @param id
-	 * @return Will delete a user by id.
+	 * @param id - The ID of the user to be deleted.
+	 * 
+	 * @return ResponseEntity<Void> - An HTTP response with a "No Content" status if
+	 *         the user is deleted successfully, or a "Not Found" status if the user
+	 *         is not found.
 	 */
 	@DeleteMapping("/{id}")
-	public ResponseEntity<UserDto> deleteUser(@PathVariable Long id) {
-		Optional<UserDto> userDto = userServiceImpl.findById(id);
-		if (!userDto.isPresent()) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		} else {
-			userServiceImpl.delete(id);
+	public ResponseEntity<Void> deleteUser(@Valid @PathVariable String id) {
+		UserDto userDto = userServiceImpl.findById(id);
+		if (userDto != null) {
+			userServiceImpl.deleteUser(id);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
+		
+		return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 	}
 }

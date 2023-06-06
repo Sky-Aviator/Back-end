@@ -1,73 +1,73 @@
 package dev.patricksilva.model.entities;
 
 import org.hibernate.validator.constraints.Length;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
-@Entity
-@Table(name = "users")
+@Document(collection = "users")
 public class User {
+	/*
+	 * Using the @NotBlank and @Length annotations, this means that the data
+	 * invalids will not be accepted when saving the entity in the database, even if
+	 * validation on the request object has been passed.
+	 */
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+	private String id;
 
 	@NotBlank
 	@Length(min = 2, max = 250)
-	@Column(nullable = false, length = 250)
 	private String firstName;
 
 	@NotBlank
 	@Length(min = 2, max = 250)
-	@Column(nullable = false, length = 250)
 	private String lastName;
 
 	@NotBlank
 	@Length(min = 12, max = 64)
-	@Column(nullable = false, length = 64, unique = true)
 	private String cpf;
 
 	@Length(min = 12, max = 64)
-	@Column(length = 64, unique = true)
 	private String card;
 
+	@Length(min = 2, max = 8)
+	private String cardMonth;
+
+	@Length(min = 2, max = 8)
+	private String cardYear;
+
+	@Length(min = 2, max = 8)
+	private String cardCv;
+
 	@NotBlank
-	@Column(nullable = false, length = 64)
+	@Length(min = 8, max = 64)
 	private String date;
 
 	@NotBlank
 	@Length(min = 9, max = 64)
-	@Column(nullable = false, length = 64)
 	private String sex;
 
 	@NotBlank
 	@Length(min = 9, max = 64)
-	@Column(nullable = false, length = 64, unique = true)
 	private String phone;
 
 	@NotBlank
 	@Length(min = 12, max = 250)
 	@Email
-	@Column(nullable = false, length = 250, unique = true)
 	private String email;
 
 	@NotBlank
 	@Length(min = 12, max = 250)
-	@Column(nullable = false, length = 250)
 	private String password;
 
 	// Getters and Setters
-	public Long getId() {
+	public String getId() {
 		return id;
 	}
 
-	public void setId(Long id) {
+	public void setId(String id) {
 		this.id = id;
 	}
 
@@ -141,5 +141,29 @@ public class User {
 
 	public void setCard(String card) {
 		this.card = card;
+	}
+
+	public String getCardMonth() {
+		return cardMonth;
+	}
+
+	public void setCardMonth(String cardMonth) {
+		this.cardMonth = cardMonth;
+	}
+
+	public String getCardYear() {
+		return cardYear;
+	}
+
+	public void setCardYear(String cardYear) {
+		this.cardYear = cardYear;
+	}
+
+	public String getCardCv() {
+		return cardCv;
+	}
+
+	public void setCardCv(String cardCv) {
+		this.cardCv = cardCv;
 	}
 }
