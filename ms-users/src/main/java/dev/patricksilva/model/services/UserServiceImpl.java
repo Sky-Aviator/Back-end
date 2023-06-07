@@ -2,6 +2,7 @@ package dev.patricksilva.model.services;
 
 import java.beans.PropertyDescriptor;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.modelmapper.ModelMapper;
@@ -9,19 +10,26 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import dev.patricksilva.model.dtos.UserDto;
 import dev.patricksilva.model.entities.User;
 import dev.patricksilva.model.exception.ResourceNotFoundException;
 import dev.patricksilva.model.repository.UserRepository;
+import dev.patricksilva.model.security.encoder.Encoder;
 import jakarta.validation.Valid;
 
 @Service
-public class UserServiceImpl {
+public class UserServiceImpl implements UserDetailsService{
 
 	@Autowired
 	private UserRepository userRepository;
+
+	@Autowired
+	private Encoder encoder;
 
 	/**
 	 * Retrieves all users present in the database.
@@ -58,9 +66,15 @@ public class UserServiceImpl {
 		}
 		ModelMapper mapper = new ModelMapper();
 		User user = mapper.map(userDto, User.class);
+		user.setPassword(encoder.encode(user.getPassword()));
+		user.setCpf(encoder.encode(user.getCpf()));
+		user.setCard(encoder.encode(user.getCard()));
+		user.setCardYear(encoder.encode(user.getCardYear()));
+		user.setCardMonth(encoder.encode(user.getCardMonth()));
+		user.setCardYear(encoder.encode(user.getCardCv()));
 		user = userRepository.save(user);
 		userDto.setId(user.getId());
-		
+
 		return userDto;
 	}
 
@@ -131,5 +145,14 @@ public class UserServiceImpl {
 				.map(PropertyDescriptor::getName).toList();
 
 		return nullProperties.toArray(new String[0]);
+	}
+
+	@Override
+	public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+		User userEntity = userRepository.findByEmail(email);
+		if (userEntity == null)
+			throw new UsernameNotFoundException(email);
+
+		return new org.springframework.security.core.userdetails.User(email, null, Collections.emptyList());
 	}
 }
