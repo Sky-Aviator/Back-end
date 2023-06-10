@@ -6,4 +6,5 @@ import dev.patricksilva.model.entities.User;
 
 public interface UserRepository extends MongoRepository<User, String>{
 	boolean existsByEmail(String email);
+	User findByEmail(String email);
 }
