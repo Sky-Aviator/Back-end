@@ -3,8 +3,19 @@ package dev.patricksilva.model.security.encoder;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+/**
+ * Custom implementation of PasswordEncoder using BCrypt hashing algorithm.
+ * 
+ * @author Patrick L. da Silva
+ */
 public class Encoder implements PasswordEncoder {
-	
+
+	/**
+	 * Encodes the provided plain text password using BCrypt hashing.
+	 *
+	 * @param plainTextPassword the plain text password to encode
+	 * @return the encoded password
+	 */
 	@Override
 	public String encode(CharSequence plainTextPassword) {
 		if (plainTextPassword != null) {
@@ -13,6 +24,12 @@ public class Encoder implements PasswordEncoder {
 		return (String) plainTextPassword;
 	}
 
+	/**
+	 * Encodes the provided plain text CPF (Brazilian ID) using BCrypt hashing.
+	 *
+	 * @param plainTextCPF the plain text CPF to encode
+	 * @return the encoded CPF
+	 */
 	public String encodeCPF(CharSequence plainTextCPF) {
 		if (plainTextCPF != null) {
 			String cpf = plainTextCPF.toString();
@@ -24,7 +41,13 @@ public class Encoder implements PasswordEncoder {
 		}
 		return (String) plainTextCPF;
 	}
-	
+
+	/**
+	 * Encodes the provided plain text card number using BCrypt hashing.
+	 *
+	 * @param plainTextCard the plain text card number to encode
+	 * @return the encoded card number
+	 */
 	public String encodeCard(CharSequence plainTextCard) {
 		if (plainTextCard != null) {
 			String card = plainTextCard.toString();
@@ -37,6 +60,14 @@ public class Encoder implements PasswordEncoder {
 		return (String) plainTextCard;
 	}
 
+	/**
+	 * Checks if the provided plain text password matches the encoded password
+	 * stored in the database.
+	 *
+	 * @param plainTextPassword  the plain text password to check
+	 * @param passwordInDatabase the encoded password stored in the database
+	 * @return true if the passwords match, false otherwise
+	 */
 	@Override
 	public boolean matches(CharSequence plainTextPassword, String passwordInDatabase) {
 		return BCrypt.checkpw(plainTextPassword.toString(), passwordInDatabase);

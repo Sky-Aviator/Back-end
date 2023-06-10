@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import dev.patricksilva.model.dtos.UserDto;
+import dev.patricksilva.model.exception.ResourceNotFoundException;
 import dev.patricksilva.model.services.UserServiceImpl;
 import dev.patricksilva.view.UserRequest;
 import dev.patricksilva.view.UserResponse;
@@ -62,6 +63,58 @@ public class UserController {
 		}
 		
 		return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+	}
+	
+	/**
+	 * Retrieves the CPF (Brazilian Individual Registry) of a user by their
+	 * ID.
+	 *
+	 * @param id - The ID of the user.
+	 * @return String - The masked CPF number of the user.
+	 * @throws ResourceNotFoundException if the user does not exist.
+	 */
+	@GetMapping("/{id}/cpf")
+	public String getUserCpf(@PathVariable String id) {
+		UserDto userDto = userServiceImpl.findById(id);
+
+		if (userDto != null) {
+			return userDto.getCpf();
+		}
+		throw new ResourceNotFoundException("Usuário com ID: " + id + " não foi encontrado.");
+	}
+	
+	/**
+	 * Retrieves the card number of a user by their ID.
+	 *
+	 * @param id - The ID of the user.
+	 * @return String - The masked card number of the user.
+	 * @throws ResourceNotFoundException if the user does not exist.
+	 */
+	@GetMapping("/{id}/card")
+	public String getUserCard(@PathVariable String id) {
+		UserDto userDto = userServiceImpl.findById(id);
+
+		if (userDto != null) {
+			return userDto.getCard();
+		}
+		throw new ResourceNotFoundException("Usuário com ID: " + id + " não foi encontrado.");
+	}
+	
+	/**
+	 * Retrieves the card expiration date of a user by their ID.
+	 *
+	 * @param id - The ID of the user.
+	 * @return String - The concatenated card expiration month and year of the user.
+	 * @throws ResourceNotFoundException if the user does not exist.
+	 */
+	@GetMapping("/{id}/cardExpiration")
+	public String getUserCardExpiration(@PathVariable String id) {
+		UserDto userDto = userServiceImpl.findById(id);
+
+		if (userDto != null) {
+			return userDto.getCardMonth() + "/" + userDto.getCardYear();
+		}
+		throw new ResourceNotFoundException("Usuário com ID: " + id + " não foi encontrado.");
 	}
 
 	/**

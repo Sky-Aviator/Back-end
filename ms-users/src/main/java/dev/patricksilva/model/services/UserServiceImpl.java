@@ -36,6 +36,7 @@ public class UserServiceImpl implements UserService, UserDetailsService{
 	 * 
 	 * @return List<UserDto> - A list containing all users in the database.
 	 */
+	@Override
 	public List<UserDto> findAll() {
 		List<User> users = userRepository.findAll();
 		return users.stream().map(user -> new ModelMapper().map(user, UserDto.class)).toList();
@@ -48,9 +49,9 @@ public class UserServiceImpl implements UserService, UserDetailsService{
 	 * @return UserDto - The user with the specified ID.
 	 * @throws ResourceNotFoundException if the user does not exist.
 	 */
+	@Override
 	public UserDto findById(@Valid String id) {
 	    User user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Id: " + id + " não encontrado!"));
-	    
 	    // Apply the CPF and Card mask in the corresponding fields
 	    user.setCpf(maskCPF(user.getCpf()));
 	    user.setCard(maskCard(user.getCard()));
@@ -66,19 +67,16 @@ public class UserServiceImpl implements UserService, UserDetailsService{
 	 * @return UserDto - The added user with assigned ID.
 	 * @throws IllegalArgumentException if the user already exists in the system.
 	 */
+	@Override
 	public UserDto addUser(@Valid UserDto userDto) {
 		if (userRepository.existsByEmail(userDto.getEmail())) {
 			throw new IllegalArgumentException("O Usuário já existe no sistema!");
 		}
 		ModelMapper mapper = new ModelMapper();
 		User user = mapper.map(userDto, User.class);
-		
 		user.setPassword(encoder.encode(user.getPassword()));
 		user.setCpf(encoder.encodeCPF(user.getCpf()));
 		user.setCard(encoder.encodeCard(user.getCard()));
-		user.setCardYear(encoder.encode(user.getCardYear()));
-		user.setCardMonth(encoder.encode(user.getCardMonth()));
-		user.setCardYear(encoder.encode(user.getCardCv()));
 		user.setCardCv(encoder.encode(user.getCardCv()));
 		user = userRepository.save(user);
 		userDto.setId(user.getId());
@@ -92,6 +90,7 @@ public class UserServiceImpl implements UserService, UserDetailsService{
 	 * @param id - The ID of the user to delete.
 	 * @throws ResourceNotFoundException if the user does not exist.
 	 */
+	@Override
 	public void deleteUser(@Valid String id) {
 		if (!userRepository.existsById(id)) {
 			throw new ResourceNotFoundException("Não pode deletar este Usuário com ID: " + id + ", pois o Usuário não existe!");
@@ -107,6 +106,7 @@ public class UserServiceImpl implements UserService, UserDetailsService{
 	 * @return the updated UserDto
 	 * @throws ResourceNotFoundException if the user does not exist
 	 */
+	@Override
 	public UserDto updateUser(@Valid String id, UserDto userDto) {
 		if (!userRepository.existsById(id)) {
 			throw new ResourceNotFoundException("Nao pode atualizar este Usuário de ID: " + id + ", pois este Usuário não existe!");
@@ -127,6 +127,7 @@ public class UserServiceImpl implements UserService, UserDetailsService{
 	 * @return the updated UserDto
 	 * @throws ResourceNotFoundException if the user does not exist
 	 */
+	@Override
 	public UserDto partialUpdate(@Valid String id, UserDto userDto) {
 		if (!userRepository.existsById(id)) {
 			throw new ResourceNotFoundException("Não é possível atualizar o usuário com ID: " + id + ", porque o usuário não existe!");
@@ -138,21 +139,6 @@ public class UserServiceImpl implements UserService, UserDetailsService{
 		ModelMapper mapper = new ModelMapper();
 		
 		return mapper.map(updatedUser, UserDto.class);
-	}
-
-	/**
-	 * Retrieves the names of null properties from an object.
-	 * @param source - The source object.
-	 * @return String[] - An array of names of null properties.
-	 */
-	private String[] getNullPropertyNames(Object source) {
-		final BeanWrapper src = new BeanWrapperImpl(source);
-		PropertyDescriptor[] descriptors = src.getPropertyDescriptors();
-		List<String> nullProperties = Arrays.stream(descriptors)
-				.filter(descriptor -> src.getPropertyValue(descriptor.getName()) == null)
-				.map(PropertyDescriptor::getName).toList();
-
-		return nullProperties.toArray(new String[0]);
 	}
 	
 	/**
@@ -256,5 +242,20 @@ public class UserServiceImpl implements UserService, UserDetailsService{
 	    }
 
 	    return new org.springframework.security.core.userdetails.User(email, null, Collections.emptyList());
+	}
+	
+	/**
+	 * Retrieves the names of null properties from an object.
+	 * @param source - The source object.
+	 * @return String[] - An array of names of null properties.
+	 */
+	private String[] getNullPropertyNames(Object source) {
+		final BeanWrapper src = new BeanWrapperImpl(source);
+		PropertyDescriptor[] descriptors = src.getPropertyDescriptors();
+		List<String> nullProperties = Arrays.stream(descriptors)
+				.filter(descriptor -> src.getPropertyValue(descriptor.getName()) == null)
+				.map(PropertyDescriptor::getName).toList();
+
+		return nullProperties.toArray(new String[0]);
 	}
 }
