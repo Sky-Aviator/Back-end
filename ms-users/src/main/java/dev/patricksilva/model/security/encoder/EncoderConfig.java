@@ -7,23 +7,25 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 
-import dev.patricksilva.model.security.service.UserService;
+import dev.patricksilva.model.security.service.SecurityService;
 
 @Configuration
 @EnableWebSecurity
 public class EncoderConfig {
 
-	private UserService userService;
+	private SecurityService securityService;
 
-	public EncoderConfig(UserService userService) {
-		this.userService = userService;
+	public EncoderConfig(SecurityService securityService) {
+		this.securityService = securityService;
 	}
 
 	@Bean
 	protected SecurityFilterChain configure(HttpSecurity http) throws Exception {
 		http.csrf().disable();
-		http.authorizeHttpRequests().requestMatchers("api/v1/users/**").permitAll().and()
-				.authenticationProvider(daoAuthenticationProvider());
+		http.authorizeHttpRequests()
+		.requestMatchers("api/v1/users/**")
+		.permitAll().and()
+		.authenticationProvider(daoAuthenticationProvider());
 
 		return http.build();
 	}
@@ -32,7 +34,7 @@ public class EncoderConfig {
 	protected DaoAuthenticationProvider daoAuthenticationProvider() {
 		DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
 		daoAuthenticationProvider.setPasswordEncoder(encoder());
-		daoAuthenticationProvider.setUserDetailsService(userService);
+		daoAuthenticationProvider.setUserDetailsService(securityService);
 		return daoAuthenticationProvider;
 	}
 

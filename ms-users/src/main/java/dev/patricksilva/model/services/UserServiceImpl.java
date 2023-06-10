@@ -23,7 +23,7 @@ import dev.patricksilva.model.security.encoder.Encoder;
 import jakarta.validation.Valid;
 
 @Service
-public class UserServiceImpl implements UserDetailsService{
+public class UserServiceImpl implements UserService, UserDetailsService{
 
 	@Autowired
 	private UserRepository userRepository;
@@ -49,12 +49,18 @@ public class UserServiceImpl implements UserDetailsService{
 	 * @throws ResourceNotFoundException if the user does not exist.
 	 */
 	public UserDto findById(@Valid String id) {
-		User user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Id: " + id + " não encontrado!"));
-		return new ModelMapper().map(user, UserDto.class);
+	    User user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Id: " + id + " não encontrado!"));
+	    
+	    // Apply the CPF and Card mask in the corresponding fields
+	    user.setCpf(maskCPF(user.getCpf()));
+	    user.setCard(maskCard(user.getCard()));
+	    user.setCardCv(maskCv(user.getCardCv()));
+	    
+	    return new ModelMapper().map(user, UserDto.class);
 	}
 
 	/**
-	 * Adds a new user to the database.
+	 * Add an user to the database and encode the sensitive fields.
 	 * 
 	 * @param userDto - The user data to add.
 	 * @return UserDto - The added user with assigned ID.
@@ -66,12 +72,14 @@ public class UserServiceImpl implements UserDetailsService{
 		}
 		ModelMapper mapper = new ModelMapper();
 		User user = mapper.map(userDto, User.class);
+		
 		user.setPassword(encoder.encode(user.getPassword()));
-		user.setCpf(encoder.encode(user.getCpf()));
-		user.setCard(encoder.encode(user.getCard()));
+		user.setCpf(encoder.encodeCPF(user.getCpf()));
+		user.setCard(encoder.encodeCard(user.getCard()));
 		user.setCardYear(encoder.encode(user.getCardYear()));
 		user.setCardMonth(encoder.encode(user.getCardMonth()));
 		user.setCardYear(encoder.encode(user.getCardCv()));
+		user.setCardCv(encoder.encode(user.getCardCv()));
 		user = userRepository.save(user);
 		userDto.setId(user.getId());
 
@@ -124,7 +132,7 @@ public class UserServiceImpl implements UserDetailsService{
 			throw new ResourceNotFoundException("Não é possível atualizar o usuário com ID: " + id + ", porque o usuário não existe!");
 		}
 		User existingUser = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Id: " + id + " não encontrado!"));
-		// Copiar apenas as propriedades não nulas de userDto para existingUser.
+		// Copy only non-null properties from userDto to existingUser.
 		BeanUtils.copyProperties(userDto, existingUser, getNullPropertyNames(userDto));
 		User updatedUser = userRepository.save(existingUser);
 		ModelMapper mapper = new ModelMapper();
@@ -146,13 +154,107 @@ public class UserServiceImpl implements UserDetailsService{
 
 		return nullProperties.toArray(new String[0]);
 	}
+	
+	/**
+	 * Masks the given credit card number.
+	 *
+	 * @param card The credit card number to be masked.
+	 * @return The masked credit card number.
+	 */
+	@Override
+	public String maskCard(String card) {
+	    if (card != null && card.length() >= 12) {
+	    	// Get the last four digits of the card
+	        String cardLastDigits = card.substring(card.length() - 4);
 
+	        // Removes all non-numeric characters from the card
+	        String cardDigits = card.replaceAll("\\D", "");
+
+	        // Apply mask to encoded digits
+	        String maskedCardDigits = cardDigits.replaceAll(".", "*");
+
+	        // Format the mask
+	        StringBuilder maskedCard = new StringBuilder(maskedCardDigits);
+	        maskedCard.insert(4, "-");
+	        maskedCard.insert(9, "-");
+	        maskedCard.insert(14, "-");
+	        maskedCard.delete(15, 60);
+	        maskedCard.append(cardLastDigits);
+
+	        return maskedCard.toString();
+	    }
+
+	    return card;
+	}
+	
+	/**
+	 * Masks the given CPF (Brazilian Individual Taxpayer Registry) number.
+	 *
+	 * @param cpf The CPF number to be masked.
+	 * @return The masked CPF number.
+	 */
+	@Override
+	public String maskCPF(String cpf) {
+		if (cpf != null && cpf.length() >= 11) {
+			// Get the last two digits of the CPF
+			String cpfLastDigits = cpf.substring(cpf.length() - 2);
+
+			// Remove all non-numeric characters from the CPF
+			String cpfDigits = cpf.replaceAll("\\D", "");
+
+			// Apply the mask to the encoded digits
+			String maskedCPFDigits = cpfDigits.replaceAll(".", "*");
+
+			// Build the final representation of the CPF with the mask
+			StringBuilder maskedCPF = new StringBuilder(maskedCPFDigits);
+			maskedCPF.insert(3, "-");
+			maskedCPF.insert(7, "-");
+			maskedCPF.insert(11, "-");
+			maskedCPF.delete(12, 60);
+			maskedCPF.append(cpfLastDigits);
+
+			return maskedCPF.toString();
+		}
+
+		return cpf;
+	}
+
+	/**
+	 * Masks the given CV (Card Verification) number.
+	 *
+	 * @param cardCv The CV number to be masked.
+	 * @return The masked CV number.
+	 */
+	@Override
+	public String maskCv(String cardCv) {
+		if (cardCv != null && cardCv.length() >= 4) {
+			// Apply the mask to the CV digits
+			String maskedCardCvDigits = cardCv.replaceAll(".", "*");
+
+			// Build the final representation of the CV with the mask
+			StringBuilder maskedCardCv = new StringBuilder(maskedCardCvDigits);
+			maskedCardCv.delete(4, 60);
+
+			return maskedCardCv.toString();
+		}
+
+		return cardCv;
+	}
+
+	/**
+	 * Retrieves user details by email for authentication purposes.
+	 *
+	 * @param email The email used as the username to load the user details.
+	 * @return An instance of UserDetails representing the user's details.
+	 * @throws UsernameNotFoundException If the user with the specified email is not found.
+	 */
 	@Override
 	public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-		User userEntity = userRepository.findByEmail(email);
-		if (userEntity == null)
-			throw new UsernameNotFoundException(email);
+	    User userEntity = userRepository.findByEmail(email);
+	    if (userEntity == null) {
+	        throw new UsernameNotFoundException(email);
+	    }
 
-		return new org.springframework.security.core.userdetails.User(email, null, Collections.emptyList());
+	    return new org.springframework.security.core.userdetails.User(email, null, Collections.emptyList());
 	}
 }

@@ -16,7 +16,7 @@ public class UserRequest {
 	private String lastName;
 
 	@NotBlank
-	@Length(min = 12, max = 64)
+	@Length(min = 11, max = 14)
 	private String cpf;
 
 	@Length(min = 12, max = 64)

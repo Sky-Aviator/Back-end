@@ -15,6 +15,20 @@ public class UserResponse {
 	private String email;
 	private String password;
 
+//	public String maskCPF(String cpf) {
+//	    if (cpf != null && cpf.length() >= 11) {
+//	        String cpfDigits = cpf.substring(0, cpf.length() - 2);
+//	        String cpfLastDigits = cpf.substring(cpf.length() - 2);
+//
+//	        // Aplica a máscara aos dígitos criptografados
+//	        String maskedCPFDigits = cpfDigits.replaceAll("\\d", "*");
+//
+//	        // Monta a representação final do CPF com a máscara
+//	        return maskedCPFDigits + cpfLastDigits;
+//	    }
+//	    return cpf;
+//	}
+
 	// Getters and Setters
 	public String getId() {
 		return id;
