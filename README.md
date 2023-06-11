@@ -57,9 +57,12 @@ A famous Discovery Service is Eureka, provided by Spring Cloud Netflix. It allow
 
 >URI: http://localhost:9093
 
-### - Endpoints Demo:
+### - Endpoints Management:
 
-(Add Swagger Documentation After)
+>URI: http://localhost:9093/swagger-ui/index.html
+
+
+![Overview](docs/Swagger%20V3.png)
 
     • MS Contas (Gerenciamento do sistema)
 
@@ -72,18 +75,6 @@ A famous Discovery Service is Eureka, provided by Spring Cloud Netflix. It allow
 | GET         | /api/v1/accounts/login    |             |
 | GET         | /api/v1/accounts/{Id}     |             |
 | DEL         | /api/v1/accounts/{Id}     |             |
-
-    • MS Usuários (Clientes)
-
-| HTTP METHOD | PATCH                  | DESCRIPTION                      |
-| ----------- | ---------------------- | -------------------------------- |
-| POST        | /api/v1/users/register | (Realizar registro do cliente)   |
-| PUT         | /api/v1/users/register |                                  |
-| PAT         | /api/v1/users/register |                                  |
-| GET         | /api/v1/users          | (Obter todos os clientes)        |
-| GET         | /api/v1/users/login    | (Obter token de auth do cliente) |
-| GET         | /api/v1/users/{Id}     | (Obter cliente por id)           |
-| DEL         | /api/v1/users/{Id}     | (Deletar cliente)                |
 
     • MS Reservas
 
