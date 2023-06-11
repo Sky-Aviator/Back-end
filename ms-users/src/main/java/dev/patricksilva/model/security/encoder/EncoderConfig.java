@@ -38,7 +38,7 @@ public class EncoderConfig {
     protected SecurityFilterChain configure(HttpSecurity http) throws Exception {
         http.csrf().disable();
         http.authorizeHttpRequests()
-                .requestMatchers("api/v1/users/**")
+                .requestMatchers("api/v1/users/**", "/swagger-ui/**", "/v3/api-docs/**")
                 .permitAll().and()
                 .authenticationProvider(daoAuthenticationProvider());
 
