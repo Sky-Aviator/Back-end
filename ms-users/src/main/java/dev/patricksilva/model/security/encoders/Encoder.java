@@ -1,13 +1,8 @@
-package dev.patricksilva.model.security.encoder;
+package dev.patricksilva.model.security.encoders;
 
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-/**
- * Custom implementation of PasswordEncoder using BCrypt hashing algorithm.
- * 
- * @author Patrick L. da Silva
- */
 public class Encoder implements PasswordEncoder {
 
 	/**
@@ -19,7 +14,7 @@ public class Encoder implements PasswordEncoder {
 	@Override
 	public String encode(CharSequence plainTextPassword) {
 		if (plainTextPassword != null) {
-			return BCrypt.hashpw(plainTextPassword.toString(), BCrypt.gensalt(8));
+			return BCrypt.hashpw(plainTextPassword.toString(), BCrypt.gensalt(12));
 		}
 		return (String) plainTextPassword;
 	}

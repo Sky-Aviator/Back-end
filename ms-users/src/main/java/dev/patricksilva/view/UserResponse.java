@@ -19,6 +19,8 @@ public class UserResponse {
 	private String phone;
 	private String email;
 
+	// Getters and Setters
+
 	/**
 	 * Gets the ID of the user.
 	 *

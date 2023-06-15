@@ -1,10 +1,5 @@
 package dev.patricksilva.model.dtos;
 
-/**
- * Data Transfer Object (DTO) representing a user.
- * 
- * @author Patrick L. da Silva
- */
 public class UserDto {
 	private String id;
 	private String firstName;
@@ -19,7 +14,15 @@ public class UserDto {
 	private String phone;
 	private String email;
 	private String password;
+	
+	public UserDto() {
+	}
 
+	public UserDto(String email, String password) {
+		this.email = email;
+		this.password = password;
+	}
+	
 	/**
 	 * Gets the ID of the user.
 	 *

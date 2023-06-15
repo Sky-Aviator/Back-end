@@ -1,11 +1,17 @@
 package dev.patricksilva.controllers;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -17,26 +23,47 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import dev.patricksilva.model.dtos.UserDto;
-import dev.patricksilva.model.entities.User;
-import dev.patricksilva.model.exception.ResourceNotFoundException;
+import dev.patricksilva.model.exceptions.ResourceNotFoundException;
+import dev.patricksilva.model.security.jwt.JwtUtils;
+import dev.patricksilva.model.security.jwt.payload.request.LoginRequest;
+import dev.patricksilva.model.security.jwt.payload.request.UserRequest;
+import dev.patricksilva.model.security.jwt.payload.response.JwtResponse;
+import dev.patricksilva.model.security.services.UserDetailsImpl;
 import dev.patricksilva.model.services.UserServiceImpl;
-import dev.patricksilva.view.UserRequest;
 import dev.patricksilva.view.UserResponse;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
 @Tag(name = "MS-USERS", description="Endpoints management.")
+@CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/v1/users")
 public class UserController {
 
-	// Dependency Injection
 	@Autowired
 	private UserServiceImpl userServiceImpl;
+	
+	@Autowired
+	private AuthenticationManager authenticationManager;
+	
+	@Autowired
+	JwtUtils jwtUtils;	
+	
+	@Operation(summary = "Realiza o Login do usuário.", 
+	description = "Realiza o login de um usuário passando só o email e a senha.")
+	@PostMapping("/login")
+	public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+		Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+		String jwt = jwtUtils.generateJwtToken(authentication);
+		UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();		
+		
+		List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority()).collect(Collectors.toList());
 
+		return ResponseEntity.ok(new JwtResponse(jwt, userDetails.getId(), userDetails.getEmail(), roles));
+	}
+	
 	/**
 	 * Method responsible for retrieving all users.
 	 * 
@@ -113,7 +140,7 @@ public class UserController {
 		}
 		throw new ResourceNotFoundException("Usuário com ID: " + id + " não foi encontrado.");
 	}
-	
+
 	/**
 	 * Retrieves the card expiration date of a user by their ID.
 	 *
@@ -141,17 +168,15 @@ public class UserController {
 	 * @return ResponseEntity<UserResponse> - An HTTP response containing the
 	 *         created user and a "Created" status.
 	 */
-	@Operation(summary = "Registra um novo Usuário.", 
-	description = "Faz o cadastro de um novo usuário no sistema.")
+	@Operation(summary = "Registra um novo Usuário.", description = "Faz o cadastro de um novo usuário no sistema.")
 	@PostMapping("/register")
-	public ResponseEntity<UserResponse> createUser(@Valid @RequestBody UserRequest userRequest) {
+	public ResponseEntity<UserResponse> registerUser(@Valid @RequestBody UserDto userDto, UserRequest userRequest) {
 		ModelMapper mapper = new ModelMapper();
-		UserDto userDto = mapper.map(userRequest, UserDto.class);
-		userDto = userServiceImpl.addUser(userDto);
-		
-		return new ResponseEntity<>(mapper.map(userDto, UserResponse.class), HttpStatus.CREATED);
-	}
+		userServiceImpl.addUser(userDto, userRequest);
 
+		return new ResponseEntity<>(mapper.map(userDto, UserResponse.class), HttpStatus.CREATED);
+	}	
+	
 	/**
 	 * Method responsible for updating a user by their ID in the database
 	 * ("/register/{id}").
@@ -169,7 +194,7 @@ public class UserController {
 	public ResponseEntity<UserResponse> updateUser(@Valid @RequestBody UserRequest userRequest, @PathVariable String id) {
 		ModelMapper mapper = new ModelMapper();
 		UserDto userDto = mapper.map(userRequest, UserDto.class);
-		userDto = userServiceImpl.updateUser(id, userDto);
+		userDto = userServiceImpl.updateUser(id, userDto, userRequest);
 		
 		return new ResponseEntity<>(mapper.map(userDto, UserResponse.class), HttpStatus.OK);
 	}
