@@ -1,11 +1,11 @@
-package dev.patricksilva.model.security.service;
+package dev.patricksilva.model.security.services;
 
-import java.util.Collections;
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import dev.patricksilva.model.entities.User;
 import dev.patricksilva.model.repository.UserRepository;
@@ -18,16 +18,8 @@ import dev.patricksilva.model.repository.UserRepository;
 @Service
 public class SecurityService implements UserDetailsService {
 
+	@Autowired
 	private UserRepository userRepository;
-
-	/**
-	 * Constructs a SecurityService with the specified UserRepository.
-	 *
-	 * @param userRepository The UserRepository to be used.
-	 */
-	public SecurityService(UserRepository userRepository) {
-		this.userRepository = userRepository;
-	}
 
 	/**
 	 * Loads a user by the given email.
@@ -37,12 +29,10 @@ public class SecurityService implements UserDetailsService {
 	 * @throws UsernameNotFoundException If the user with the specified email is not
 	 */
 	@Override
+	@Transactional
 	public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-		User user = userRepository.findByEmail(email);
-		if (user == null) {
-			throw new UsernameNotFoundException(email);
-		}
+		User user = userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("User Not Found with username: " + email));
 
-		return new org.springframework.security.core.userdetails.User(email, null, Collections.emptyList());
+		return UserDetailsImpl.build(user);
 	}
 }

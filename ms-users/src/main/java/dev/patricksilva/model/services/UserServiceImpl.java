@@ -2,34 +2,42 @@ package dev.patricksilva.model.services;
 
 import java.beans.PropertyDescriptor;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import dev.patricksilva.model.dtos.UserDto;
+import dev.patricksilva.model.entities.Role;
 import dev.patricksilva.model.entities.User;
-import dev.patricksilva.model.exception.ResourceNotFoundException;
+import dev.patricksilva.model.enums.ERole;
+import dev.patricksilva.model.exceptions.ResourceNotFoundException;
+import dev.patricksilva.model.exceptions.RoleNotFoundException;
+import dev.patricksilva.model.repository.RoleRepository;
 import dev.patricksilva.model.repository.UserRepository;
-import dev.patricksilva.model.security.encoder.Encoder;
+import dev.patricksilva.model.security.encoders.Encoder;
+import dev.patricksilva.model.security.jwt.payload.request.UserRequest;
+import dev.patricksilva.model.security.jwt.payload.response.MessageResponse;
 import jakarta.validation.Valid;
 
 @Service
-public class UserServiceImpl implements UserService, UserDetailsService{
+public class UserServiceImpl implements UserService{
+	
+	@Autowired
+	private Encoder encoder;
 
 	@Autowired
 	private UserRepository userRepository;
-
+	
 	@Autowired
-	private Encoder encoder;
+	private RoleRepository roleRepository;
 
 	/**
 	 * Retrieves all users present in the database.
@@ -68,21 +76,27 @@ public class UserServiceImpl implements UserService, UserDetailsService{
 	 * @throws IllegalArgumentException if the user already exists in the system.
 	 */
 	@Override
-	public UserDto addUser(@Valid UserDto userDto) {
+	public ResponseEntity<?> addUser(@Valid UserDto userDto, UserRequest userRequest) {
 		if (userRepository.existsByEmail(userDto.getEmail())) {
 			throw new IllegalArgumentException("O Usuário já existe no sistema!");
 		}
 		ModelMapper mapper = new ModelMapper();
 		User user = mapper.map(userDto, User.class);
+
+		getRolesFromRequest(userRequest);
+
 		user.setPassword(encoder.encode(user.getPassword()));
 		user.setCpf(encoder.encodeCPF(user.getCpf()));
 		user.setCard(encoder.encodeCard(user.getCard()));
 		user.setCardCv(encoder.encode(user.getCardCv()));
-		user = userRepository.save(user);
+		user.setRoles(getRolesFromRequest(userRequest));
+		
+		userRepository.save(user);
+		
 		userDto.setId(user.getId());
 
-		return userDto;
-	}
+		return ResponseEntity.ok(new MessageResponse("Usuário registrado com sucesso!"));
+	}	
 
 	/**
 	 * Deletes a user by their ID.
@@ -93,7 +107,7 @@ public class UserServiceImpl implements UserService, UserDetailsService{
 	@Override
 	public void deleteUser(@Valid String id) {
 		if (!userRepository.existsById(id)) {
-			throw new ResourceNotFoundException("Não pode deletar este Usuário com ID: " + id + ", pois o Usuário não existe!");
+			throw new ResourceNotFoundException("Não pode deletar o Usuário com ID: " + id + ", pois o Usuário não existe!");
 		}
 		userRepository.deleteById(id);
 	}
@@ -107,18 +121,27 @@ public class UserServiceImpl implements UserService, UserDetailsService{
 	 * @throws ResourceNotFoundException if the user does not exist
 	 */
 	@Override
-	public UserDto updateUser(@Valid String id, UserDto userDto) {
+	public UserDto updateUser(@Valid String id, UserDto userDto, UserRequest userRequest) {
 		if (!userRepository.existsById(id)) {
-			throw new ResourceNotFoundException("Nao pode atualizar este Usuário de ID: " + id + ", pois este Usuário não existe!");
+			throw new ResourceNotFoundException("Nao pode atualizar o Usuário de ID: " + id + ", pois este Usuário não existe!");
 		}
 		userDto.setId(id);
 		ModelMapper mapper = new ModelMapper();
 		User user = mapper.map(userDto, User.class);
+		
+		getRolesFromRequest(userRequest);
+		
+		user.setPassword(encoder.encode(user.getPassword()));
+		user.setCpf(encoder.encodeCPF(user.getCpf()));
+		user.setCard(encoder.encodeCard(user.getCard()));
+		user.setCardCv(encoder.encode(user.getCardCv()));
+		user.setRoles(getRolesFromRequest(userRequest));
+		
 		userRepository.save(user);
 		
 		return userDto;
 	}
-
+	
 	/**
 	 * Partially update a user by ID.
 	 *
@@ -174,7 +197,7 @@ public class UserServiceImpl implements UserService, UserDetailsService{
 	}
 	
 	/**
-	 * Masks the given CPF (Brazilian Individual Taxpayer Registry) number.
+	 * Masks the given CPF (Brazilian Individual Registry) number.
 	 *
 	 * @param cpf The CPF number to be masked.
 	 * @return The masked CPF number.
@@ -228,22 +251,45 @@ public class UserServiceImpl implements UserService, UserDetailsService{
 	}
 
 	/**
-	 * Retrieves user details by email for authentication purposes.
-	 *
-	 * @param email The email used as the username to load the user details.
-	 * @return An instance of UserDetails representing the user's details.
-	 * @throws UsernameNotFoundException If the user with the specified email is not found.
+	 * Adds a role for user.
+	 * 
+	 * @param userRequest
+	 * @return User's roles.
 	 */
-	@Override
-	public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-	    User userEntity = userRepository.findByEmail(email);
-	    if (userEntity == null) {
-	        throw new UsernameNotFoundException(email);
-	    }
+	public Set<Role> getRolesFromRequest(UserRequest userRequest) {
+		Set<String> strRoles = userRequest.getRoles();
+		Set<Role> roles = new HashSet<>();
 
-	    return new org.springframework.security.core.userdetails.User(email, null, Collections.emptyList());
+		if (strRoles == null) {
+			Role userRole = roleRepository.findByName(ERole.ROLE_USER).orElseThrow(() -> new RoleNotFoundException("Erro: Função " + ERole.ROLE_USER + "não encontrada."));
+			roles.add(userRole);
+		} else {
+			strRoles.forEach(role -> {
+				
+				switch (role) {
+				case "admin":
+					Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN).orElseThrow(
+							() -> new RoleNotFoundException("Erro: Função " + ERole.ROLE_ADMIN + "não encontrada."));
+					roles.add(adminRole);
+					break;
+
+				case "mod":
+					Role modRole = roleRepository.findByName(ERole.ROLE_MODERATOR)
+							.orElseThrow(() -> new RoleNotFoundException("Erro: Função " + ERole.ROLE_MODERATOR + "não encontrada."));
+					roles.add(modRole);
+					break;
+
+				default:
+					Role userRole = roleRepository.findByName(ERole.ROLE_USER)
+					.orElseThrow(() -> new RoleNotFoundException("Erro: Função " + ERole.ROLE_USER + "não encontrada."));
+					roles.add(userRole);
+				}
+			});
+		}
+
+		return roles;
 	}
-	
+
 	/**
 	 * Retrieves the names of null properties from an object.
 	 * @param source - The source object.
@@ -257,5 +303,16 @@ public class UserServiceImpl implements UserService, UserDetailsService{
 				.map(PropertyDescriptor::getName).toList();
 
 		return nullProperties.toArray(new String[0]);
+	}
+
+	@Override
+	public UserDto findByEmail(String email) {
+	    User user = userRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("E-mail: " + email + " não encontrado!"));
+	    // Apply the CPF and Card mask in the corresponding fields
+	    user.setCpf(maskCPF(user.getCpf()));
+	    user.setCard(maskCard(user.getCard()));
+	    user.setCardCv(maskCv(user.getCardCv()));
+	    
+	    return new ModelMapper().map(user, UserDto.class);
 	}
 }

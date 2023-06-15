@@ -2,7 +2,10 @@ package dev.patricksilva.model.services;
 
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
+
 import dev.patricksilva.model.dtos.UserDto;
+import dev.patricksilva.model.security.jwt.payload.request.UserRequest;
 
 /**
  * Interface for user-related operations and services.
@@ -12,12 +15,21 @@ import dev.patricksilva.model.dtos.UserDto;
 public interface UserService {
 
 	/**
-	 * Adds a new user to the system.
-	 *
-	 * @param userDto the user data to add
-	 * @return the added user with assigned ID
+	 * Find the user's email
+	 * 
+	 * @param email
+	 * @return The user's email.
 	 */
-	UserDto addUser(UserDto userDto);
+	UserDto findByEmail(String email); 
+	
+	/**
+	 * Adds a new user to the system.
+	 * 
+	 * @param userDto
+	 * @param userRequest
+	 * @return The added user with assigned ID
+	 */
+	ResponseEntity<?> addUser(UserDto userDto, UserRequest userRequest);
 
 	/**
 	 * Retrieves a user by ID.
@@ -48,7 +60,7 @@ public interface UserService {
 	 * @param userDto the updated user data
 	 * @return the updated user
 	 */
-	UserDto updateUser(String id, UserDto userDto);
+	UserDto updateUser(String id, UserDto userDto, UserRequest userRequest);
 
 	/**
 	 * Performs a partial update on a user by ID with the provided user data.

@@ -1,10 +1,5 @@
 package dev.patricksilva.model.error;
 
-/**
- * Represents an error message with a title, status, and message.
- * 
- * @author Patrick L. da Silva
- */
 public class ErrorMessage {
 	private String title;
 	private Integer status;

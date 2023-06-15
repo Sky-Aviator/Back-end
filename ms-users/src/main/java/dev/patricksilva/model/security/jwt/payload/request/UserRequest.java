@@ -1,15 +1,12 @@
-package dev.patricksilva.view;
+package dev.patricksilva.model.security.jwt.payload.request;
+
+import java.util.Set;
 
 import org.hibernate.validator.constraints.Length;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
-/**
- * Class representing a user request.
- *
- * @author Patrick L. da Silva
- */
 public class UserRequest {
 
 	@NotBlank
@@ -57,6 +54,28 @@ public class UserRequest {
 	@Length(min = 12, max = 250)
 	private String password;
 
+	/**
+	 * Set - Roles
+	 */
+	private Set<String> roles;
+
+	/**
+	 * UserRequest no args contructor.
+	 */
+	public UserRequest() {
+	}
+
+	/**
+	 * UserRequest Constructor with args.
+	 * 
+	 * @param email
+	 * @param password
+	 */
+	public UserRequest(String email, String password) {
+		this.email = email;
+		this.password = password;
+	}
+
 	// Getters and Setters
 
 	/**
@@ -66,6 +85,24 @@ public class UserRequest {
 	 */
 	public String getFirstName() {
 		return firstName;
+	}
+
+	/**
+	 * Retrieves the user's role.
+	 * 
+	 * @return The user's role.
+	 */
+	public Set<String> getRoles() {
+		return roles;
+	}
+
+	/**
+	 * Sets the user's role.
+	 * 
+	 * @param roles
+	 */
+	public void setRoles(Set<String> roles) {
+		this.roles = roles;
 	}
 
 	/**

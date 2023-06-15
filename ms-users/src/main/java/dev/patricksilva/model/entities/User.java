@@ -1,17 +1,16 @@
 package dev.patricksilva.model.entities;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.hibernate.validator.constraints.Length;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
-/**
- * Represents a User entity.
- * 
- * @author Patrick L. da Silva
- */
 @Document(collection = "users")
 public class User {
 
@@ -67,6 +66,27 @@ public class User {
 	@NotBlank
 	@Length(min = 12, max = 250)
 	private String password;
+
+	@DBRef
+	private Set<Role> roles = new HashSet<>();
+
+	/**
+	 * Explicit Constructor.
+	 */
+	public User() {
+	}
+
+	/**
+	 * User Contructor.
+	 * 
+	 * @param username
+	 * @param email
+	 * @param password
+	 */
+	public User(String email, String password) {
+		this.email = email;
+		this.password = password;
+	}
 
 	/**
 	 * Retrieves the user's ID.
@@ -300,5 +320,23 @@ public class User {
 	 */
 	public void setCardCv(String cardCv) {
 		this.cardCv = cardCv;
+	}
+
+	/**
+	 * Retrieves the user's role.
+	 * 
+	 * @return the user's role.
+	 */
+	public Set<Role> getRoles() {
+		return roles;
+	}
+
+	/**
+	 * Sets the user's role.
+	 * 
+	 * @param roles - The user's role.
+	 */
+	public void setRoles(Set<Role> roles) {
+		this.roles = roles;
 	}
 }

@@ -1,10 +1,12 @@
 package dev.patricksilva.model.repository;
 
+import java.util.Optional;
+
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 import dev.patricksilva.model.entities.User;
 
 public interface UserRepository extends MongoRepository<User, String>{
-	boolean existsByEmail(String email);
-	User findByEmail(String email);
+	Boolean existsByEmail(String email);
+	Optional<User> findByEmail(String email);
 }
