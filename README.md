@@ -1,9 +1,33 @@
-# Sky Aviator Airlines
+# Sky Aviator Agency.
 
 ## Overview:
 
 ![Overview](System-Design/Sky%20Aviator%20-%20System%20Design%20-%20V1.2.jpg)
 
+## Prerequisites:
+
+- JDK 20
+- Spring Boot 3.X.X
+- Maven 3.X.X
+
+## Technology stack:
+
+- Java `20`
+- Spring Boot `3.X.X`
+- Spring Data JPA `3.1.0`
+- Sonar Lint `5.1`
+- Docker
+- MySQL `8.0.33`
+- PostgreSQL `15.0`
+- MongoDB `6.0`
+- Redis `6.0`
+- ATP Oracle
+- JWT (JSON Web Tokens) `0.11.5`
+- Spring Security `6.1.0`
+- Spring Cloud Discovery Service `4.0.2`
+- Spring Cloud Gateway `4.0.6`
+- Spring Cloud LoadBalancer
+- Swagger `3.0.3`
 
 ## Microservices:
 
@@ -17,11 +41,11 @@
 
 ## Database:
 
-| Service   | Host    | Port |
-| --------- | ------- | ---- |
-| Redis     |127.0.0.1| 6379 |
-| MySQL     |localhost| 3306 |
-| MongoDB   |localhost| 27017|
+| Service | Host      | Port  |
+| ------- | --------- | ----- |
+| Redis   | 127.0.0.1 | 6379  |
+| MySQL   | localhost | 3306  |
+| MongoDB | localhost | 27017 |
 
 ## Spring Cloud API Gateway:
 
@@ -64,18 +88,6 @@ A famous Discovery Service is Eureka, provided by Spring Cloud Netflix. It allow
 
 ![Overview](docs/Swagger%20V3.png)
 
-    • MS Contas (Gerenciamento do sistema)
-
-| HTTP METHOD | PATCH                     | DESCRIPTION |
-| ----------- | ------------------------- | ----------- |
-| POST        | /api/v1/accounts/register |             |
-| PUT         | /api/v1/accounts/register |             |
-| PAT         | /api/v1/accounts/register |             |
-| GET         | /api/v1/accounts          |             |
-| GET         | /api/v1/accounts/login    |             |
-| GET         | /api/v1/accounts/{Id}     |             |
-| DEL         | /api/v1/accounts/{Id}     |             |
-
     • MS Reservas
 
 | HTTP METHOD | PATCH                                                   | DESCRIPTION                                             |
@@ -109,10 +121,3 @@ A famous Discovery Service is Eureka, provided by Spring Cloud Netflix. It allow
 | GET         | /api/v1/airports/{city}?{lag}?{long} |             |
 | GET         | /api/v1/airports/{lag}/{long}        |             |
 | DEL         | /api/v1/airports/{Id}                |             |
-
-
-• MS Cotação (Cotação do dólar para converter o preço atual do BD para dólar))
-
-| HTTP METHOD | PATCH | DESCRIPTION |
-| ----------- | ----- | ----------- |
-| TODO        | TODO  | TODO        |

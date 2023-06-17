@@ -1,5 +1,11 @@
 package dev.patricksilva.model.dtos;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import dev.patricksilva.model.entities.Photo;
+import dev.patricksilva.model.entities.Role;
+
 public class UserDto {
 	private String id;
 	private String firstName;
@@ -14,13 +20,53 @@ public class UserDto {
 	private String phone;
 	private String email;
 	private String password;
-	
+	private Photo photo;
+	private Set<Role> roles = new HashSet<>();
+
 	public UserDto() {
 	}
 
 	public UserDto(String email, String password) {
 		this.email = email;
 		this.password = password;
+	}
+	
+	// Getters and Setters
+	
+	/**
+	 * Retrieves the user's photo.
+	 * 
+	 * @return The user's photo.
+	 */
+	public Photo getPhoto() {
+		return photo;
+	}
+
+	/**
+	 * Sets the user's photo.
+	 * 
+	 * @param photo - The user's photo.
+	 */
+	public void setPhoto(Photo photo) {
+		this.photo = photo;
+	}
+
+	/**
+	 * Retrieves the user's role.
+	 * 
+	 * @return the user's role.
+	 */
+	public Set<Role> getRoles() {
+		return roles;
+	}
+
+	/**
+	 * Sets the user's role.
+	 * 
+	 * @param roles - The user's role.
+	 */
+	public void setRoles(Set<Role> roles) {
+		this.roles = roles;
 	}
 	
 	/**

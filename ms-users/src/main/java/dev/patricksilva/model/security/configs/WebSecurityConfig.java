@@ -27,6 +27,11 @@ public class WebSecurityConfig {
 	@Autowired
 	private AuthEntryPointJwt unauthorizedHandler;
 	
+	/**
+	 * Creates and returns an AuthTokenFilter object for filtering and authenticating JWT tokens.
+	 *
+	 * @return An AuthTokenFilter object for filtering JWT tokens.
+	 */
 	@Bean
 	AuthTokenFilter authenticationJwtTokenFilter() {
 		return new AuthTokenFilter();
@@ -68,6 +73,13 @@ public class WebSecurityConfig {
 		return daoAuthenticationProvider;
 	}
 
+	/**
+	 * Creates and returns an AuthenticationManager object based on the provided AuthenticationConfiguration.
+	 *
+	 * @param authConfig The AuthenticationConfiguration used to retrieve the AuthenticationManager.
+	 * @return An AuthenticationManager object.
+	 * @throws Exception if an exception occurs while retrieving the AuthenticationManager.
+	 */
 	@Bean
 	AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
 		return authConfig.getAuthenticationManager();

@@ -7,11 +7,6 @@ import org.springframework.http.ResponseEntity;
 import dev.patricksilva.model.dtos.UserDto;
 import dev.patricksilva.model.security.jwt.payload.request.UserRequest;
 
-/**
- * Interface for user-related operations and services.
- * 
- * @author Patrick L. da Silva
- */
 public interface UserService {
 
 	/**
