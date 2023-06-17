@@ -1,8 +1,11 @@
 package dev.patricksilva.model.error;
 
 public class ErrorMessage {
+	
 	private String title;
+	
 	private Integer status;
+	
 	private String message;
 
 	/**

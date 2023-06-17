@@ -29,20 +29,20 @@ import dev.patricksilva.model.security.jwt.payload.request.LoginRequest;
 import dev.patricksilva.model.security.jwt.payload.request.UserRequest;
 import dev.patricksilva.model.security.jwt.payload.response.JwtResponse;
 import dev.patricksilva.model.security.services.UserDetailsImpl;
-import dev.patricksilva.model.services.UserServiceImpl;
+import dev.patricksilva.model.services.UserService;
 import dev.patricksilva.view.UserResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
-@Tag(name = "MS-USERS", description="Endpoints management.")
+@Tag(name = "MS-USERS", description="Endpoints Management.")
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/v1/users")
 public class UserController {
 
 	@Autowired
-	private UserServiceImpl userServiceImpl;
+	private UserService userService;
 	
 	@Autowired
 	private AuthenticationManager authenticationManager;
@@ -50,6 +50,12 @@ public class UserController {
 	@Autowired
 	JwtUtils jwtUtils;	
 	
+	/**
+	 * Method responsible for authenticating the user.
+	 * 
+	 * @param loginRequest
+	 * @return The JWT Token, User's ID, User's Email and Roles.
+	 */
 	@Operation(summary = "Realiza o Login do usuário.", 
 	description = "Realiza o login de um usuário passando só o email e a senha.")
 	@PostMapping("/login")
@@ -58,7 +64,6 @@ public class UserController {
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 		String jwt = jwtUtils.generateJwtToken(authentication);
 		UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();		
-		
 		List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority()).collect(Collectors.toList());
 
 		return ResponseEntity.ok(new JwtResponse(jwt, userDetails.getId(), userDetails.getEmail(), roles));
@@ -75,7 +80,7 @@ public class UserController {
 	@GetMapping
 	public ResponseEntity<List<UserResponse>> findAllUsers() {
 		ModelMapper mapper = new ModelMapper();
-		List<UserDto> users = userServiceImpl.findAll();
+		List<UserDto> users = userService.findAll();
 		List<UserResponse> response = users.stream().map(u -> mapper.map(u, UserResponse.class)).toList();
 
 		return new ResponseEntity<>(response, HttpStatus.OK);
@@ -92,7 +97,7 @@ public class UserController {
 	description = "Recupera um usuário passando como especificação o seu ID. A resposta é o objeto usuário com: id, firstName, lastName, cpf, card, cardMonth, cardYear, cardCv, date, sex, phone, email.")
 	@GetMapping("/{id}")
 	public ResponseEntity<UserResponse> findUserById(@Valid @PathVariable String id) {
-		UserDto userDto = userServiceImpl.findById(id);
+		UserDto userDto = userService.findById(id);
 		if (userDto != null) {
 			ModelMapper mapper = new ModelMapper();
 			UserResponse user = mapper.map(userDto, UserResponse.class);
@@ -114,7 +119,7 @@ public class UserController {
 	description = "Recupera um cpf passando como especificação o ID de seu portador. A resposta é o cpf daquele usuário com máscara: 'cpf' : '***-***-***-XX'.")
 	@GetMapping("/{id}/cpf")
 	public String getUserCpf(@PathVariable String id) {
-		UserDto userDto = userServiceImpl.findById(id);
+		UserDto userDto = userService.findById(id);
 
 		if (userDto != null) {
 			return userDto.getCpf();
@@ -133,7 +138,7 @@ public class UserController {
 	description = "Recupera um cartão passando como especificação o ID de seu portador. A resposta é o cartão daquele usuário com máscara: 'card' : '****-****-****-XXXX'.")
 	@GetMapping("/{id}/card")
 	public String getUserCard(@PathVariable String id) {
-		UserDto userDto = userServiceImpl.findById(id);
+		UserDto userDto = userService.findById(id);
 
 		if (userDto != null) {
 			return userDto.getCard();
@@ -152,7 +157,7 @@ public class UserController {
 	description = "Recupera a data de expiração de um cartão passando como especificação o ID de seu portador. A resposta é a data de expiração do cartão daquele usuário: 'cardMonth + cardYear' : 'XX/YY'.")
 	@GetMapping("/{id}/cardExpiration")
 	public String getUserCardExpiration(@PathVariable String id) {
-		UserDto userDto = userServiceImpl.findById(id);
+		UserDto userDto = userService.findById(id);
 
 		if (userDto != null) {
 			return userDto.getCardMonth() + "/" + userDto.getCardYear();
@@ -172,21 +177,17 @@ public class UserController {
 	@PostMapping("/register")
 	public ResponseEntity<UserResponse> registerUser(@Valid @RequestBody UserDto userDto, UserRequest userRequest) {
 		ModelMapper mapper = new ModelMapper();
-		userServiceImpl.addUser(userDto, userRequest);
+		userService.addUser(userDto, userRequest);
 
 		return new ResponseEntity<>(mapper.map(userDto, UserResponse.class), HttpStatus.CREATED);
 	}	
 	
 	/**
-	 * Method responsible for updating a user by their ID in the database
-	 * ("/register/{id}").
+	 * Method responsible for updating a user by their ID in the database ("/register/{id}").
 	 * 
 	 * @param userRequest - The updated user data.
-	 * 
-	 * @param id          - The ID of the user to be updated.
-	 * 
-	 * @return ResponseEntity<UserResponse> - An HTTP response containing the
-	 *         updated user and an "OK" status.
+	 * @param id - The ID of the user to be updated.
+	 * @return ResponseEntity<UserResponse> - An HTTP response containing the updated user and an "OK" status.
 	 */
 	@Operation(summary = "Atualiza um Usuário por seu ID.", 
 	description = "Atualiza o cadastro de um Usuário por seu ID. A resposta são os campos escolhidos atualizados.: 'firstName':'João'.")
@@ -194,25 +195,23 @@ public class UserController {
 	public ResponseEntity<UserResponse> updateUser(@Valid @RequestBody UserRequest userRequest, @PathVariable String id) {
 		ModelMapper mapper = new ModelMapper();
 		UserDto userDto = mapper.map(userRequest, UserDto.class);
-		userDto = userServiceImpl.updateUser(id, userDto, userRequest);
+		userDto = userService.updateUser(id, userDto, userRequest);
 		
 		return new ResponseEntity<>(mapper.map(userDto, UserResponse.class), HttpStatus.OK);
 	}
 
 	/**
-	 * Method responsible for updating part of a user by their ID in the database
-	 * ("/register/{id}").
+	 * Method responsible for updating part of a user by their ID in the database ("/register/{id}").
 	 * 
-	 * @param id      - The ID of the user to be updated.
+	 * @param id - The ID of the user to be updated.
 	 * @param userDto - The updated user data.
-	 * @return ResponseEntity<UserDto> - An HTTP response containing the updated
-	 *         user and an "OK" status.
+	 * @return ResponseEntity<UserDto> - An HTTP response containing the updated user and an "OK" status.
 	 */
 	@Operation(summary = "Atualiza pacialmente um Usuário por seu ID.", 
 	description = "Atualiza parcialmente o cadastro de um Usuário por seu ID. A resposta são os campos escolhidos atualizados.: 'firstName':'João'.")
 	@PatchMapping("/register/{id}")
 	public ResponseEntity<UserDto> partialUpdateUser(@PathVariable("id") String id, @RequestBody @Valid UserDto userDto) {
-		UserDto updatedUser = userServiceImpl.partialUpdate(id, userDto);
+		UserDto updatedUser = userService.partialUpdate(id, userDto);
 		
 		return ResponseEntity.ok(updatedUser);
 	}
@@ -221,18 +220,15 @@ public class UserController {
 	 * Method responsible for deleting a user by their ID in the database ("/{id}").
 	 * 
 	 * @param id - The ID of the user to be deleted.
-	 * 
-	 * @return ResponseEntity<Void> - An HTTP response with a "No Content" status if
-	 *         the user is deleted successfully, or a "Not Found" status if the user
-	 *         is not found.
+	 * @return ResponseEntity<Void> - An HTTP response with a "No Content" status if the user is deleted successfully, or a "Not Found" status if the user is not found.
 	 */
 	@Operation(summary = "Deleta um Usuário por seu ID.", 
 	description = "Deleta de forma permanente o cadastro de um Usuário por seu ID. A resposta é: 'No Content'.")
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Void> deleteUser(@Valid @PathVariable String id) {
-		UserDto userDto = userServiceImpl.findById(id);
+		UserDto userDto = userService.findById(id);
 		if (userDto != null) {
-			userServiceImpl.deleteUser(id);
+			userService.deleteUser(id);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 		

@@ -47,7 +47,7 @@ public class User {
 	private String cardCv;
 
 	@NotBlank
-	@Length(min = 8, max = 64)
+	@Length(min = 8, max = 12)
 	private String date;
 
 	@NotBlank
@@ -68,10 +68,13 @@ public class User {
 	private String password;
 
 	@DBRef
-	private Set<Role> roles = new HashSet<>();
+	private Photo photo;
 
+	@DBRef
+	private Set<Role> roles = new HashSet<>();
+	
 	/**
-	 * Explicit Constructor.
+	 * No Args
 	 */
 	public User() {
 	}
@@ -86,6 +89,26 @@ public class User {
 	public User(String email, String password) {
 		this.email = email;
 		this.password = password;
+	}
+	
+	// Getters and Setters
+
+	/**
+	 * Retrieves the user's photo.
+	 *
+	 * @return The user's photo.
+	 */
+	public Photo getPhoto() {
+		return photo;
+	}
+
+	/**
+	 * Sets the user's photo.
+	 *
+	 * @param id The user's photo.
+	 */
+	public void setPhoto(Photo photo) {
+		this.photo = photo;
 	}
 
 	/**

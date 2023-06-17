@@ -29,7 +29,12 @@ public class JwtUtils {
 	@Value("${sky-aviator.app.jwtExpirationMs}")
 	private long jwtExpirationMs;
 
-	// generateJwtToken alimentado somente com o id, abaixo:
+	/**
+	 * Generates a JWT token based on the user's authentication.
+	 *
+	 * @param authentication The authentication object.
+	 * @return The generated JWT token.
+	 */
 	public String generateJwtToken(Authentication authentication) {
 	    UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
 	    
@@ -37,6 +42,13 @@ public class JwtUtils {
 
 	    // Adicione o ID do usuário como campo personalizado
 	    claims.put("id", userPrincipal.getId()); 
+	    claims.put("firstName", userPrincipal.getFirstName());
+	    claims.put("lastName", userPrincipal.getLastName());
+	    claims.put("cpf", userPrincipal.getCpf());
+	    claims.put("phone", userPrincipal.getPhone());
+	    claims.put("card", userPrincipal.getCard());
+	    claims.put("cardMonth", userPrincipal.getCardMonth());
+	    claims.put("cardYear", userPrincipal.getCardYear());
 	    
 	    Date now = new Date();
 	    Date expiration = new Date(now.getTime() + jwtExpirationMs);
@@ -49,10 +61,22 @@ public class JwtUtils {
 	            .compact();
 	}
 
+	/**
+     * Retrieves the email from the JWT token.
+     *
+     * @param token The JWT token.
+     * @return The email extracted from the token.
+     */
 	public String getEmailFromJwtToken(String token) {
 		return Jwts.parserBuilder().setSigningKey(jwtSecret.getBytes(StandardCharsets.UTF_8)).build().parseClaimsJws(token).getBody().getSubject();
 	}
 
+	/**
+	 * Validates the JWT token.
+	 *
+	 * @param authToken The JWT token to validate.
+	 * @return True if the token is valid, false otherwise.
+	 */
 	public boolean validateJwtToken(String authToken) {
 		try {
 			Jwts.parserBuilder().setSigningKey(jwtSecret.getBytes(StandardCharsets.UTF_8)).build().parseClaimsJws(authToken);

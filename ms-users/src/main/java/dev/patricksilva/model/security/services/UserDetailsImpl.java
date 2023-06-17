@@ -11,18 +11,28 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import dev.patricksilva.model.entities.User;
+import dev.patricksilva.model.dtos.UserDto;
 
 public class UserDetailsImpl implements UserDetails {
 	private static final long serialVersionUID = 1L;
 
 	private String id;
 
-//	private String username;
+	private String firstName;
+
+	private String lastName;
 
 	private String email;
 
 	private String card;
+
+	private String cpf;
+
+	private String phone;
+
+	private String cardMonth;
+
+	private String cardYear;
 
 	@JsonIgnore
 	private String password;
@@ -37,19 +47,78 @@ public class UserDetailsImpl implements UserDetails {
 	 * @param password
 	 * @param authorities
 	 */
-	public UserDetailsImpl(String id,  String email, String password,
-			Collection<? extends GrantedAuthority> authorities) {
+	public UserDetailsImpl(String id, String firstName, String lastName, String email, String password,
+			Collection<? extends GrantedAuthority> authorities, String card, String cpf, String phone, String cardMonth, String cardYear) {
 		this.id = id;
+		this.firstName = firstName;
+		this.lastName = lastName;
 		this.email = email;
 		this.password = password;
 		this.authorities = authorities;
+		this.card = card;
+		this.cpf = cpf;
+		this.phone = phone;
+		this.cardMonth = cardMonth;
+		this.cardYear = cardYear;
 	}
 
-	public static UserDetailsImpl build(User user) {
-		List<GrantedAuthority> authorities = user.getRoles().stream()
+	public static UserDetailsImpl build(UserDto userDto) {
+		List<GrantedAuthority> authorities = userDto.getRoles().stream()
 				.map(role -> new SimpleGrantedAuthority(role.getName().name())).collect(Collectors.toList());
 
-		return new UserDetailsImpl(user.getId(), user.getEmail(), user.getPassword(), authorities);
+		return new UserDetailsImpl(userDto.getId(), userDto.getFirstName(), userDto.getLastName(), userDto.getEmail(),
+				userDto.getPassword(), authorities, userDto.getCard(), userDto.getCpf(), userDto.getPhone(),
+				userDto.getCardMonth(), userDto.getCardYear());
+	}
+
+	// Getters and Setters
+
+	public String getPhone() {
+		return phone;
+	}
+
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
+
+	public String getFirstName() {
+		return firstName;
+	}
+
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
+	}
+
+	public String getLastName() {
+		return lastName;
+	}
+
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
+	}
+
+	public String getCardMonth() {
+		return cardMonth;
+	}
+
+	public void setCardMonth(String cardMonth) {
+		this.cardMonth = cardMonth;
+	}
+
+	public String getCardYear() {
+		return cardYear;
+	}
+
+	public void setCardYear(String cardYear) {
+		this.cardYear = cardYear;
+	}
+
+	public String getCpf() {
+		return cpf;
+	}
+
+	public void setCpf(String cpf) {
+		this.cpf = cpf;
 	}
 
 	public String getCard() {

@@ -90,7 +90,7 @@ public class UserServiceImpl implements UserService{
 		user.setCard(encoder.encodeCard(user.getCard()));
 		user.setCardCv(encoder.encode(user.getCardCv()));
 		user.setRoles(getRolesFromRequest(userRequest));
-		
+				
 		userRepository.save(user);
 		
 		userDto.setId(user.getId());
@@ -307,7 +307,7 @@ public class UserServiceImpl implements UserService{
 
 	@Override
 	public UserDto findByEmail(String email) {
-	    User user = userRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("E-mail: " + email + " não encontrado!"));
+	    UserDto user = userRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("E-mail: " + email + " não encontrado!"));
 	    // Apply the CPF and Card mask in the corresponding fields
 	    user.setCpf(maskCPF(user.getCpf()));
 	    user.setCard(maskCard(user.getCard()));
