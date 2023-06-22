@@ -5,6 +5,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,6 +27,12 @@ public class LoginController {
     @Autowired
     private LoginService loginService;
 
+    @GetMapping("/api/v1/userboard")
+    @PreAuthorize("ROLE_USER")
+    public ResponseEntity<String> userBoard(){
+    	return ResponseEntity.ok("User board");
+    }
+    
     /**
      * Get the User's information based on the provided type.
      * 

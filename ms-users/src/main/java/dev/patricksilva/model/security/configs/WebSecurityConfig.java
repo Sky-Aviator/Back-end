@@ -15,6 +15,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import dev.patricksilva.model.security.encoders.Encoder;
 import dev.patricksilva.model.security.jwt.AuthEntryPointJwt;
 import dev.patricksilva.model.security.jwt.AuthTokenFilter;
+import dev.patricksilva.model.security.oauth2.CustomOAuth2UserService;
 import dev.patricksilva.model.security.services.SecurityService;
 
 @Configuration
@@ -27,6 +28,8 @@ public class WebSecurityConfig {
 	@Autowired
 	private AuthEntryPointJwt unauthorizedHandler;
 	
+	@Autowired
+	private CustomOAuth2UserService customOAuth2UserService;
 	/**
 	 * Creates and returns an AuthTokenFilter object for filtering and authenticating JWT tokens.
 	 *
@@ -44,21 +47,22 @@ public class WebSecurityConfig {
      * @return The configured SecurityFilterChain.
      * @throws Exception If an error occurs while configuring the HttpSecurity.
      */
-    @Bean
-    SecurityFilterChain configure(HttpSecurity http) throws Exception {
-    	http.cors().and().csrf().disable();
-    	
-    	http.exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-    	
-    	http.authorizeHttpRequests()
-    	.requestMatchers("/**")
-    	.permitAll().anyRequest().authenticated();
-    	
-    	http.authenticationProvider(daoAuthenticationProvider());
-    	http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
-    	
-    	return http.build();
-    }
+	@Bean
+	SecurityFilterChain configure(HttpSecurity http) throws Exception {
+	    http.cors().and().csrf().disable();
+//	    http.exceptionHandling().authenticationEntryPoint(unauthorizedHandler);
+	    http.authorizeHttpRequests()
+	        .requestMatchers("/**").permitAll()
+	        .anyRequest().authenticated()
+	        .and()
+	        .oauth2Login().userInfoEndpoint()
+	        .userService(customOAuth2UserService);
+	    http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+	    http.authenticationProvider(daoAuthenticationProvider());
+	    http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
+
+	    return http.build();
+	}
 
     /**
      * Configures the DaoAuthenticationProvider.
