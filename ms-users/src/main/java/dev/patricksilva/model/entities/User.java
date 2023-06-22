@@ -73,6 +73,8 @@ public class User {
 	@DBRef
 	private Set<Role> roles = new HashSet<>();
 	
+	private String token;
+	
 	/**
 	 * No Args
 	 */
@@ -91,6 +93,14 @@ public class User {
 		this.password = password;
 	}
 	
+	public String getToken() {
+		return token;
+	}
+	
+	public void setToken(String token) {
+		this.token = token;
+	}
+
 	// Getters and Setters
 
 	/**
