@@ -1,0 +1,6 @@
+FROM openjdk:22-jdk-oracle
+WORKDIR /app
+COPY target/eureka-service-0.0.1-SNAPSHOT.jar .
+EXPOSE 9092
+CMD ["java", "-jar", "my-application.jar", "--spring.application.name=DiscoveryService", "--server.port=9092", "--eureka.client.register-with-eureka=false", "--eureka.client.fetch-registry=false", "--eureka.client.serviceUrl.defaultZone=http://localhost:9092/eureka"]
+
