@@ -15,7 +15,6 @@ public class FlightSearchService {
     private FlightSearchRepository flightSearchRepository;
 
     public List<Map<String, Object>> searchFlights(String cidadeOrigem, String cidadeDestino, String partidaPrevista) {
-
     	return flightSearchRepository.searchFlights(cidadeOrigem, cidadeDestino, partidaPrevista);
     }
 }
