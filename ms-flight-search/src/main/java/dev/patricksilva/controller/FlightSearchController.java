@@ -27,31 +27,28 @@ public class FlightSearchController {
 	private FlightSearchService flightSearchService;
 
 	/**
-	 * Returns a message containing the port at which the service is running.
+	 * Returns a message containing the port at which the service is running. O(1)
 	 *
 	 * @param port The port at which the service is running.
 	 * @return A message containing the port at which the service is running.
 	 */
-	@Operation(summary = "Fornece a porta que o serviço está operando.", 
-			description = "Fornece a porta que o microserviço está operando.")
+	@Operation(summary = "Fornece a porta que o serviço está operando.", description = "Fornece a porta que o microserviço está operando.")
 	@GetMapping
 	public String statusService(@Value("${local.server.port}") String port) {
 
 		return String.format("Service running at port: %s", port);
 	}
 
-	// IDA (One Way)
 	// List of Map para pesquisar mais rapido que somente Uma Lista de String.
 	/**
-	 * Performs a search for one-way flights.
+	 * Performs a search for one-way flights. O(k)
 	 *
 	 * @param cidadeOrigem    The origin city of the trip.
 	 * @param cidadeDestino   The destination city of the trip.
 	 * @param partidaPrevista The expected departure date.
 	 * @return A response containing the list of corresponding one-way flights.
 	 */
-	@Operation(summary = "Realiza a pesquisa de passagem de ida única(One Way).", 
-			description = "Realiza a pesquisa de passagem aerea de ida única (One Way), ao local desejado.")
+	@Operation(summary = "Realiza a pesquisa de passagem de ida única(One Way).", description = "Realiza a pesquisa de passagem aerea de ida única (One Way), ao local desejado.")
 	@GetMapping("/flights/oneway")
 	public ResponseEntity<List<Map<String, Object>>> searchFlightsOneWay(
 			@RequestParam("from") String cidadeOrigem, 
@@ -59,16 +56,11 @@ public class FlightSearchController {
 			@RequestParam("going") String partidaPrevista) {
 		List<Map<String, Object>> flightsOneWay = flightSearchService.searchFlights(cidadeOrigem, cidadeDestino, partidaPrevista);
 		
-		 if (flightsOneWay.isEmpty()) {
-		        return ResponseEntity.noContent().build();
-		    } else {
-		        return ResponseEntity.ok(flightsOneWay);
-		    }
+		return flightsOneWay.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(flightsOneWay);
 	}
 	
-	// IDA E VOLTA (Round Trip)
 	/**
-	 * Performs a search for roundtrip flights.
+	 * Performs a search for roundtrip flights. O(k) 
 	 *
 	 * @param cidadeOrigem      The origin city of the trip.
 	 * @param cidadeDestino     The destination city of the trip.
@@ -76,8 +68,7 @@ public class FlightSearchController {
 	 * @param partidaPrevista2  The expected return date.
 	 * @return A response containing the search results for roundtrip flights.
 	 */
-	@Operation(summary = "Realiza a pesquisa de passagem de ida e volta (Roundtrip).", 
-			description = "Realiza a pesquisa de passagem aerea de ida e volta (Roundtrip), ao local desejado.")
+	@Operation(summary = "Realiza a pesquisa de passagem de ida e volta (Roundtrip).", description = "Realiza a pesquisa de passagem aerea de ida e volta (Roundtrip), ao local desejado.")
 	@GetMapping("/flights/roundtrip")
 	public ResponseEntity<FlightSearchResult> searchFlightsRoundtrip(
 			@RequestParam("from") String cidadeOrigem, 
@@ -86,12 +77,8 @@ public class FlightSearchController {
 			@RequestParam("return") String partidaPrevista2) {
 		List<Map<String, Object>> flightsOneWay = flightSearchService.searchFlights(cidadeOrigem, cidadeDestino, partidaPrevista);
 	    List<Map<String, Object>> flightsReturn = flightSearchService.searchFlights(cidadeDestino, cidadeOrigem, partidaPrevista2);
-
-	    if (!flightsReturn.isEmpty() && !flightsOneWay.isEmpty()) {
-	        FlightSearchResult result = new FlightSearchResult(flightsOneWay, flightsReturn);
-	        return ResponseEntity.ok(result);
-	    } else {
-	    	return ResponseEntity.noContent().build();
-	    }
+	    
+		FlightSearchResult result = (!flightsReturn.isEmpty() && !flightsOneWay.isEmpty()) ? new FlightSearchResult(flightsOneWay, flightsReturn) : null;
+		return (result != null) ? ResponseEntity.ok(result) : ResponseEntity.noContent().build();
 	}
 }

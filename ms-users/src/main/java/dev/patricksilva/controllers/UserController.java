@@ -56,8 +56,7 @@ public class UserController {
 	 * @param loginRequest
 	 * @return The JWT Token, User's ID, User's Email and Roles.
 	 */
-	@Operation(summary = "Realiza o Login do usuário.", 
-	description = "Realiza o login de um usuário passando só o email e a senha.")
+	@Operation(summary = "Realiza o Login do usuário.", description = "Realiza o login de um usuário passando só o email e a senha.")
 	@PostMapping("/login")
 	public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
 		Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
@@ -66,14 +65,15 @@ public class UserController {
 		UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();		
 		List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority()).collect(Collectors.toList());
 
-		return ResponseEntity.ok(new JwtResponse(jwt, userDetails.getId(), userDetails.getEmail(), roles));
+		return (jwt != null && userDetails != null && roles != null)
+				? ResponseEntity.ok(new JwtResponse(jwt, userDetails.getId(), userDetails.getEmail(), roles))
+				: ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 	}
 	
 	/**
 	 * Method responsible for retrieving all users.
 	 * 
-	 * @return ResponseEntity<List<UserResponse>> - An HTTP response containing the
-	 *         list of users found.
+	 * @return ResponseEntity<List<UserResponse>> - An HTTP response containing the list of users found.
 	 */
 	@Operation(summary = "Recupera todos os Usuário no sistema.", 
 	description = "Recupera todos os usuários no sistema. A resposta é o objeto usuário com: id, firstName, lastName, cpf, card, cardMonth, cardYear, cardCv, date, sex, phone, email.")
@@ -83,7 +83,7 @@ public class UserController {
 		List<UserDto> users = userService.findAll();
 		List<UserResponse> response = users.stream().map(u -> mapper.map(u, UserResponse.class)).toList();
 
-		return new ResponseEntity<>(response, HttpStatus.OK);
+		return (response != null) ? new ResponseEntity<>(response, HttpStatus.OK) : ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 	}
 
 	/**
@@ -170,8 +170,7 @@ public class UserController {
 	 * 
 	 * @param userRequest - The user data to be registered.
 	 * 
-	 * @return ResponseEntity<UserResponse> - An HTTP response containing the
-	 *         created user and a "Created" status.
+	 * @return ResponseEntity<UserResponse> - An HTTP response containing the created user and a "Created" status.
 	 */
 	@Operation(summary = "Registra um novo Usuário.", description = "Faz o cadastro de um novo usuário no sistema.")
 	@PostMapping("/register")
@@ -179,8 +178,9 @@ public class UserController {
 		ModelMapper mapper = new ModelMapper();
 		userService.addUser(userDto, userRequest);
 
-		return new ResponseEntity<>(mapper.map(userDto, UserResponse.class), HttpStatus.CREATED);
-	}	
+		UserResponse userResponse = mapper.map(userDto, UserResponse.class);
+		return (userResponse != null) ? ResponseEntity.status(HttpStatus.CREATED).body(userResponse) : ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+	}
 	
 	/**
 	 * Method responsible for updating a user by their ID in the database ("/register/{id}").
@@ -189,15 +189,15 @@ public class UserController {
 	 * @param id - The ID of the user to be updated.
 	 * @return ResponseEntity<UserResponse> - An HTTP response containing the updated user and an "OK" status.
 	 */
-	@Operation(summary = "Atualiza um Usuário por seu ID.", 
-	description = "Atualiza o cadastro de um Usuário por seu ID. A resposta são os campos escolhidos atualizados.: 'firstName':'João'.")
+	@Operation(summary = "Atualiza um Usuário por seu ID.", description = "Atualiza o cadastro de um Usuário por seu ID. A resposta são os campos escolhidos atualizados.: 'firstName':'João'.")
 	@PutMapping("/register/{id}")
 	public ResponseEntity<UserResponse> updateUser(@Valid @RequestBody UserRequest userRequest, @PathVariable String id) {
 		ModelMapper mapper = new ModelMapper();
 		UserDto userDto = mapper.map(userRequest, UserDto.class);
 		userDto = userService.updateUser(id, userDto, userRequest);
 		
-		return new ResponseEntity<>(mapper.map(userDto, UserResponse.class), HttpStatus.OK);
+		UserResponse userResponse = mapper.map(userDto, UserResponse.class);
+		return (userResponse != null) ? ResponseEntity.ok(userResponse) : ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 	}
 
 	/**
@@ -207,13 +207,12 @@ public class UserController {
 	 * @param userDto - The updated user data.
 	 * @return ResponseEntity<UserDto> - An HTTP response containing the updated user and an "OK" status.
 	 */
-	@Operation(summary = "Atualiza pacialmente um Usuário por seu ID.", 
-	description = "Atualiza parcialmente o cadastro de um Usuário por seu ID. A resposta são os campos escolhidos atualizados.: 'firstName':'João'.")
+	@Operation(summary = "Atualiza pacialmente um Usuário por seu ID.", description = "Atualiza parcialmente o cadastro de um Usuário por seu ID. A resposta são os campos escolhidos atualizados.: 'firstName':'João'.")
 	@PatchMapping("/register/{id}")
 	public ResponseEntity<UserDto> partialUpdateUser(@PathVariable("id") String id, @RequestBody @Valid UserDto userDto) {
 		UserDto updatedUser = userService.partialUpdate(id, userDto);
 		
-		return ResponseEntity.ok(updatedUser);
+		return (updatedUser != null) ? ResponseEntity.ok(updatedUser) : ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 	}
 
 	/**
@@ -222,8 +221,7 @@ public class UserController {
 	 * @param id - The ID of the user to be deleted.
 	 * @return ResponseEntity<Void> - An HTTP response with a "No Content" status if the user is deleted successfully, or a "Not Found" status if the user is not found.
 	 */
-	@Operation(summary = "Deleta um Usuário por seu ID.", 
-	description = "Deleta de forma permanente o cadastro de um Usuário por seu ID. A resposta é: 'No Content'.")
+	@Operation(summary = "Deleta um Usuário por seu ID.", description = "Deleta de forma permanente o cadastro de um Usuário por seu ID. A resposta é: 'No Content'.")
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Void> deleteUser(@Valid @PathVariable String id) {
 		UserDto userDto = userService.findById(id);
