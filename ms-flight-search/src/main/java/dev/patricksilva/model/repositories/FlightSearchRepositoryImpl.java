@@ -14,7 +14,7 @@ public class FlightSearchRepositoryImpl implements FlightSearchRepository {
     private JdbcTemplate jdbc;
 
 	/**
-     * Searches for flights based on the specified criteria.
+     * Searches for flights based on the specified criteria. O(log n)
      *
      * @param cidadeOrigem      The origin city of the flight.
      * @param cidadeDestino     The destination city of the flight.

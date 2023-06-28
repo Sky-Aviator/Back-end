@@ -12,8 +12,6 @@ public class FlightSearchResult {
         this.flightsReturn = flightsReturn;
     }
 
-    // Getters
-    
     public List<Map<String, Object>> getFlightsOneWay() {
         return flightsOneWay;
     }
@@ -21,4 +19,12 @@ public class FlightSearchResult {
     public List<Map<String, Object>> getFlightsReturn() {
         return flightsReturn;
     }
+
+    public void setFlightsOneWay(List<Map<String, Object>> flightsOneWay) {
+		this.flightsOneWay = flightsOneWay;
+	}
+
+	public void setFlightsReturn(List<Map<String, Object>> flightsReturn) {
+		this.flightsReturn = flightsReturn;
+	}
 }
