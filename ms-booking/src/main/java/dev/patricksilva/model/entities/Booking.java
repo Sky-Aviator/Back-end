@@ -9,7 +9,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
-@Entity(name = "Reservas")
+@Entity(name = "Booking_Going")
 public class Booking {
 
 	@Id
@@ -18,73 +18,75 @@ public class Booking {
 	private Long ticketNumber;
 
 	@Basic
-	@Column(name = "type_of_flight", nullable = false, length = 18)
+	@Column(name = "type_of_flight", length = 18)
 	private String typeOfFlight;
 
 	@Basic
-	@Column(name = "flight_number", nullable = false, length = 18)
+	@Column(name = "flight_number", length = 18)
 	private String flightNumber;
 
 	@Basic
-	@Column(name = "airline_name", nullable = false, length = 64)
+	@Column(name = "airline_name", length = 64)
 	private String airlineName;
 
 	@Basic
-	@Column(name = "passenger_name", nullable = false, length = 64)
+	@Column(name = "passenger_name", length = 64)
 	private String passengerName;
 
 	@Basic
-	@Column(name = "number_seat", nullable = false, length = 64)
+	@Column(name = "number_seat", length = 64)
 	private String numberSeat;
 
 	@Basic
-	@Column(name = "flight_class", nullable = false, length = 64)
+	@Column(name = "flight_class", length = 64)
 	private String flightClass;
 
 	@Basic
-	@Column(name = "airport_origin", nullable = false, length = 64)
+	@Column(name = "airport_origin", length = 64)
 	private String airportOrigin;
 
 	@Basic
-	@Column(name = "from_location", nullable = false, length = 64)
+	@Column(name = "from_location", length = 250)
 	private String fromLocation;
 
 	@Basic
-	@Column(name = "to_location", nullable = false, length = 64)
+	@Column(name = "to_location", length = 250)
 	private String toLocation;
 
 	@Basic
-	@Column(name = "airport_destiny", nullable = false, length = 64)
+	@Column(name = "airport_destiny", length = 64)
 	private String airportDestiny;
 
 	@Basic
-	@Column(name = "departure_time", nullable = false, length = 64)
+	@Column(name = "departure_time", length = 250)
 	private String departureTime;
 
 	@Basic
-	@Column(name = "arrival_time", nullable = false, length = 64)
+	@Column(name = "arrival_time", length = 250)
 	private String arrivalTime;
 
 	@Basic
-	@Column(name = "airport_gate_origin", nullable = false, length = 64)
+	@Column(name = "airport_gate_origin", length = 64)
 	private String airportGateOrigin;
 
 	@Basic
-	@Column(name = "airport_gate_destiny", nullable = false, length = 64)
+	@Column(name = "airport_gate_destiny", length = 64)
 	private String airportGateDestiny;
 
 	@Basic
-	@Column(name = "flight_duration", nullable = false, length = 64)
+	@Column(name = "flight_duration", length = 64)
 	private Double flightDuration;
 
 	@Basic
-	@Column(name = "amount", nullable = false, length = 64)
+	@Column(name = "amount", length = 64)
 	private Double amount;
 
 	public Booking() {
-		// Gerar UUID para os campos
+	// Gerar UUID para os campos
 		this.airportGateOrigin = generateRandomUUID();
 		this.airportGateDestiny = generateRandomUUID();
+		this.numberSeat = generateRandomUUID();
+		this.flightClass = "First Class";
 	}
 
 	// Generate Random UUID 
