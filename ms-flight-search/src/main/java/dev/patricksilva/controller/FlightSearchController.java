@@ -91,6 +91,30 @@ public class FlightSearchController {
 	}
 
 	/**
+	 * 
+	 * @param cidadeOrigem
+	 * @param cidadeDestino
+	 * @param partidaPrevista
+	 * @return
+	 */
+	@PostMapping("/flights/booking-going")
+	public ResponseEntity<FlightSearchResult> sendingBookingTicketGoing(
+			@RequestParam("from") String cidadeOrigem, 
+			@RequestParam("to") String cidadeDestino, 
+			@RequestParam("going") String partidaPrevista) {
+		List<Map<String, Object>> flightsOneway = flightSearchService.searchFlights(cidadeOrigem, cidadeDestino, partidaPrevista);
+		
+		FlightSearchResult result = new FlightSearchResult(flightsOneway);
+
+	    Gson gson = new Gson();
+	    String json = gson.toJson(result);
+
+	    rabbitTemplate.convertAndSend("booking_queue", json);
+
+	    return (result!=null) ? ResponseEntity.ok(result) : ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+	}
+	
+	/**
 	 * Handles the booking of a flight ticket by sending a booking request to the "booking_queue" RabbitMQ queue.
 	 * It searches for available flights based on the provided origin, destination, and departure dates.
 	 * It constructs a FlightSearchResult object with the search results and converts it to JSON format.
@@ -102,11 +126,10 @@ public class FlightSearchController {
 	 * @param cidadeDestino  The destination city for the flight.
 	 * @param partidaPrevista The departure date for the flight.
 	 * @param partidaPrevista2 The return departure date for the flight.
-	 * @return ResponseEntity containing the FlightSearchResult if the booking request is successful,
-	 *         or INTERNAL_SERVER_ERROR response if any error occurs.
+	 * @return ResponseEntity containing the FlightSearchResult if the booking request is successful, or INTERNAL_SERVER_ERROR response if any error occurs.
 	 */
-	@PostMapping("/flights/booking")
-	public ResponseEntity<FlightSearchResult> sendingBookingTicket(
+	@PostMapping("/flights/booking-roundtrip")
+	public ResponseEntity<FlightSearchResult> sendingBookingTicketRoundtrip(
 			@RequestParam("from") String cidadeOrigem, 
 			@RequestParam("to") String cidadeDestino, 
 			@RequestParam("going") String partidaPrevista, 

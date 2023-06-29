@@ -1,4 +1,4 @@
-package dev.patricksilva.model.entities;
+package dev.patricksilva.model.view;
 
 public class Message {
 	private String content;

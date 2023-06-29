@@ -3,20 +3,22 @@ package dev.patricksilva.model.entities;
 import java.util.UUID;
 
 import jakarta.persistence.Basic;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 
-@Entity(name = "Bookings_Going")
-public class Booking {
+@Entity(name = "Bookings_Return")
+public class BookingReturn {
 
 	@Id
-	@Column(name = "going_ticket_id")
+	@Column(name = "return_ticket_id")
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long ticketNumber;
+	private Long returnTicketNumber;
 
 	@Basic
 	@Column(name = "type_of_flight", length = 18)
@@ -82,18 +84,19 @@ public class Booking {
 	@Column(name = "amount", length = 64)
 	private Double amount;
 
-	@OneToOne(mappedBy = "goingBooking")
-    private BookingReturn bookingReturn;
-	
-	public Booking() {
-	// Gerar UUID para os campos
+	@OneToOne(cascade = CascadeType.REMOVE)
+    @JoinColumn(name = "going_ticket_id")
+    private Booking goingBooking;
+
+	public BookingReturn() {
+		// Gerar UUID para os campos
 		this.airportGateOrigin = generateRandomUUID();
 		this.airportGateDestiny = generateRandomUUID();
 		this.numberSeat = generateRandomUUID();
 		this.flightClass = "First Class";
 	}
 
-	// Generate Random UUID 
+	// Generate Random UUID
 	private String generateRandomUUID() {
 		UUID uuid = UUID.randomUUID();
 
@@ -102,20 +105,20 @@ public class Booking {
 
 	// Getters and Setters
 
-	public BookingReturn getBookingReturn() {
-		return bookingReturn;
-	}
-	
-	public void setBookingReturn(BookingReturn bookingReturn) {
-		this.bookingReturn = bookingReturn;
+	public Booking getGoingBooking() {
+		return goingBooking;
 	}
 
-	public Long getTicketNumber() {
-		return ticketNumber;
+	public void setGoingBooking(Booking goingBooking) {
+		this.goingBooking = goingBooking;
 	}
 
-	public void setTicketNumber(Long ticketNumber) {
-		this.ticketNumber = ticketNumber;
+	public Long getReturnTicketNumber() {
+		return returnTicketNumber;
+	}
+
+	public void setReturnTicketNumber(Long returnTicketNumber) {
+		this.returnTicketNumber = returnTicketNumber;
 	}
 
 	public String getTypeOfFlight() {
