@@ -3,10 +3,19 @@ package dev.patricksilva.model.services;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 public class FlightSearchResult {
-    private List<Map<String, Object>> flightsOneWay;
+	@Autowired
+	private List<Map<String, Object>> flightsOneWay;
+    
+	@Autowired
     private List<Map<String, Object>> flightsReturn;
 
+	public FlightSearchResult(List<Map<String, Object>> flightsOneWay) {
+        this.flightsOneWay = flightsOneWay;
+    }
+	
     public FlightSearchResult(List<Map<String, Object>> flightsOneWay, List<Map<String, Object>> flightsReturn) {
         this.flightsOneWay = flightsOneWay;
         this.flightsReturn = flightsReturn;

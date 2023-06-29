@@ -28,7 +28,7 @@ public class LoginController {
     private LoginService loginService;
 
     @GetMapping("/api/v1/userboard")
-    @PreAuthorize("ROLE_USER")
+    @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<String> userBoard(){
     	return ResponseEntity.ok("User board");
     }

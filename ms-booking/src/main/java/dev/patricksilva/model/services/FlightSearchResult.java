@@ -6,10 +6,6 @@ import java.util.Map;
 public class FlightSearchResult {
 	private List<Map<String, Object>> flightsOneWay;
 	private List<Map<String, Object>> flightsReturn;
-//	private FlightQuery flightQuery;
-
-	public FlightSearchResult() {
-	}
 
 	public FlightSearchResult(List<Map<String, Object>> flightsOneWay, List<Map<String, Object>> flightsReturn) {
 		this.flightsOneWay = flightsOneWay;
