@@ -1,27 +1,41 @@
+
+<div style="text-align:center">
+
+![Overview](docs/Logo_Sky-Aviator.png)
+
+</div>
+
 # Sky Aviator Agency.
+
+Status: `Developing`.
 
 ## Overview:
 
-![Overview](System-Design/Sky%20Aviator%20-%20System%20Design%20-%20V1.2.jpg)
+Sky Aviator is a travel agency specializing in the sale of airline tickets. With a wide selection of destinations and partnerships with renowned airlines, we are here to make your travels unforgettable.
+This backend was developed using Microservices aiming at greater scalability and independence between services. Below you can see more about the project.
+
+## System Design - Version 2.0:
+![Overview](System-Design/SkyAviator-V2.0.jpg)
 
 ## Prerequisites:
 
 - JDK 20
-- Spring Boot 3.X.X
-- Maven 3.X.X
+- Spring Boot 3.0.7
+- Maven 3.9.2
 
 ## Technology stack:
 
 - Java `20`
-- Spring Boot `3.X.X`
+- Spring Boot `3.0.7`
 - Spring Data JPA `3.1.0`
 - Sonar Lint `5.1`
-- Docker
+- Docker `24.0.2`
 - MySQL `8.0.33`
 - PostgreSQL `15.0`
 - MongoDB `6.0`
 - Redis `6.0`
-- ATP Oracle
+- RabbitMQ `3.12.1`
+- ATP Oracle `21c`
 - JWT (JSON Web Tokens) `0.11.5`
 - Spring Security `6.1.0`
 - Spring Cloud Discovery Service `4.0.2`
@@ -29,23 +43,30 @@
 - Spring Cloud LoadBalancer
 - Swagger `3.0.3`
 
-## Microservices:
+### Microservices:
 
-| Microservice   | PORT |
-| -------------- | ---- |
-| config-server  | 9090 |
-| api-gateway    | 9091 |
-| eureka-service | 9092 |
-| ms-users       | 9093 |
-| ms-booking     | 9094 |
+| MICROSERVICES    | PORT |
+| ---------------- | ---- |
+| Config-Server    | 9090 |
+| Api-Gateway      | 9091 |
+| Eureka-Service   | 9092 |
+| Ms-Users         | 9093 |
+| Ms-Booking       | 9094 |
+| MS-Flight-Search | 9095 |
 
-## Database:
+### Database:
 
 | Service | Host      | Port  |
 | ------- | --------- | ----- |
-| Redis   | 127.0.0.1 | 6379  |
+| Redis   | localhost | 6379  |
 | MySQL   | localhost | 3306  |
 | MongoDB | localhost | 27017 |
+
+### Services:
+
+| Service  | Host      | Port |
+| -------- | --------- | ---- |
+| RabbitMQ | localhost | 5672 |
 
 ## Spring Cloud API Gateway:
 
@@ -61,7 +82,7 @@ Register the microservices.
 
 The route to "ms-users" microservice for example:
 
->http://localhost:9091/ms-users/api/v1/users
+>URI: http://localhost:9091/ms-users/api/v1/users
 
 This should return all registered users.
 
@@ -73,51 +94,42 @@ A Discovery Service is a fundamental component in a microservices architecture. 
 
 A famous Discovery Service is Eureka, provided by Spring Cloud Netflix. It allows services to register and discover each other using logical names, making scalability and resilience easier to achieve in a microservices architecture.
 
->URI: http://localhost:9092/eureka
+>http://localhost:9092/eureka
+
+# Endpoints:
 
 ## Ms-Users:
 
 "ms-users" is our user microservice;
 
->URI: http://localhost:9093
+>http://localhost:9093
 
-### - Endpoints Management:
+### - Swagger Documentation:
 
->URI: http://localhost:9093/swagger-ui/index.html
-
+>http://localhost:9093/swagger-ui/index.html
 
 ![Overview](docs/Swagger%20V3.png)
 
-    • MS Reservas
+## Ms-Booking:
 
-| HTTP METHOD | PATCH                                                   | DESCRIPTION                                             |
-| ----------- | ------------------------------------------------------- | ------------------------------------------------------- |
-| POST        | /api/v1/booking                                         | (Realizar reserva)                                      |
-| PUT         | /api/v1/booking                                         |                                                         |
-| PAT         | /api/v1/booking                                         |                                                         |
-| GET         | /api/v1/booking                                         | (Obter todos as reservas, disponíveis ou indisponíveis) |
-| GET         | /api/v1/booking/available                               | (Obter todas as reservas disponíveis)                   |
-| GET         | /api/v1/booking/available/{Id}                          | (Obter todas as reservas disponíveis por Id)            |
-| GET         | /api/v1/booking/reserved                                | (Obter todas as reservas indisponíveis)                 |
-| GET         | /api/v1/booking/reserved/{Id}                           | (Obter todas as reservas indisponíveis por Id)          |
-| GET         | /api/v1/booking/{city}                                  | (Obter Reserva com parâmetros)                          |
-| GET         | /api/v1/booking/available/{city}?{lowerDate=2023-06-27} | (Obter Reserva por menor data - Obrigatório)            |
-| GET         | /api/v1/booking/available/{city}?{upperDate=2023-09-30} | (Obter Reserva por maior data - Opcional)               |
-| GET         | /api/v1/booking/available/{city}?{lowerHour=HH-MM-ss}   | (Obter Reserva por menor hora - Opcional)               |
-| GET         | /api/v1/booking/available/{city}?{upperHour=HH-MM-ss}   | (Obter Reserva por maior hora - Opcional)               |
-| DEL         | /api/v1/booking/{Id}                                    | (Deletar Reserva)                                       |
- 
-    • MS Aeroporto (Acesso restrito - Gerenciamento do aeroporto)
+"ms-booking" is our booking microservice, responsible for receiving tickets from the flight search service via rabbitMQ and storing them in our database.
 
-| HTTP METHOD | PATCH                                | DESCRIPTION |
-| ----------- | ------------------------------------ | ----------- |
-| POST        | /api/v1/airports                     |             |
-| PUT         | /api/v1/airports                     |             |
-| PAT         | /api/v1/airports                     |             |
-| GET         | /api/v1/airports                     |             |
-| GET         | /api/v1/airports/{Id}                |             |
-| GET         | /api/v1/airports/{countries}         |             |
-| GET         | /api/v1/airports/{city}              |             |
-| GET         | /api/v1/airports/{city}?{lag}?{long} |             |
-| GET         | /api/v1/airports/{lag}/{long}        |             |
-| DEL         | /api/v1/airports/{Id}                |             |
+>http://localhost:9094
+
+### - Swagger Documentation:
+
+>http://localhost:9094/swagger-ui/index.html
+
+![Overview](docs/booking.png)
+
+## Ms-Flight-Search:
+
+"ms-flight-search" is our flight search microservice, responsible for searching all available flights and sending the flights to the booking service.
+
+>http://localhost:9095
+
+### - Swagger Documentation:
+
+>http://localhost:9095/swagger-ui/index.html
+
+![Overview](docs/flight-search.png)
