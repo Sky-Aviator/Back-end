@@ -1,11 +1,6 @@
-
-<div style="text-align:center">
-
 ![Overview](docs/Logo_Sky-Aviator.png)
 
-</div>
-
-# Sky Aviator Agency.
+## Sky Aviator Agency.
 
 Status: `Developing`.
 
