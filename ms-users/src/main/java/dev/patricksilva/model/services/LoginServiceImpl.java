@@ -39,7 +39,7 @@ public class LoginServiceImpl implements LoginService {
 			return "expiration: " + cardExpiration;
 		case FULL_NAME:
 			String fullName = claims.get("firstName", String.class) + " " + claims.get("lastName", String.class);
-			return "fullName: " + fullName;
+			return fullName;
 		case PHONE:
 			return claims.get("phone", String.class);
 		default:

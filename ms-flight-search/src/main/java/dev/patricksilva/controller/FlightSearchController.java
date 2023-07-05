@@ -137,7 +137,7 @@ public class FlightSearchController {
 		List<Map<String, Object>> flightsOneWay = flightSearchService.searchFlights(cidadeOrigem, cidadeDestino, partidaPrevista);
 	    List<Map<String, Object>> flightsReturn = flightSearchService.searchFlights(cidadeDestino, cidadeOrigem, partidaPrevista2);
 	    FlightSearchResult result = new FlightSearchResult(flightsOneWay, flightsReturn);
-
+	  
 	    Gson gson = new Gson();
 	    String json = gson.toJson(result);
 
