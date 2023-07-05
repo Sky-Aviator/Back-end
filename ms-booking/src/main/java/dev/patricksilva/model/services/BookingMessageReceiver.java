@@ -9,7 +9,6 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestHeader;
 
 import com.google.gson.Gson;
 
@@ -43,7 +42,7 @@ public class BookingMessageReceiver {
 	 *                                    booking message.
 	 */
 	@RabbitListener(queues = "booking_queue")
-	private void receiveBookingTicket(@Payload String message, @RequestHeader("Authorization") String authorizationHeader) {
+	private void receiveBookingTicket(@Payload String message) {
 		try {
 			Gson gson = new Gson();
 			FlightSearchResult flightSearchResult = gson.fromJson(message, FlightSearchResult.class);
@@ -56,7 +55,7 @@ public class BookingMessageReceiver {
 
 			if (flightSearchResult.getFlightsOneWay() != null && !flightsOneWay.isEmpty()) {
 				Map<String, Object> firstFlight = flightsOneWay.get(0);
-				Booking booking = createBookingFromFlightMap(firstFlight, authorizationHeader);
+				Booking booking = createBookingFromFlightMap(firstFlight);
 
 				bookingRepository.save(booking);
 
@@ -64,7 +63,7 @@ public class BookingMessageReceiver {
 					logger.info("Flights Return: " + flightSearchResult.getFlightsReturn().get(0));
 					
 					Map<String, Object> firstReturn = flightsReturn.get(0);
-					BookingReturn bookingReturn = createBookingFromFlightMapReturn(firstReturn, authorizationHeader);
+					BookingReturn bookingReturn = createBookingFromFlightMapReturn(firstReturn);
 					bookingReturn.setGoingBooking(booking);
 
 					bookingRepositoryReturn.save(bookingReturn);
@@ -84,7 +83,7 @@ public class BookingMessageReceiver {
 	 * @param flight The flight map containing the flight information.
 	 * @return The created Booking object.
 	 */
-	private Booking createBookingFromFlightMap(Map<String, Object> flight, String authorizationHeader) {
+	private Booking createBookingFromFlightMap(Map<String, Object> flight) {
 		Booking booking = new Booking();
 		booking.setTypeOfFlight(flight.get("Tipo de Voo").toString());
 		booking.setFlightNumber(flight.get("N. do Voo").toString());
@@ -106,7 +105,7 @@ public class BookingMessageReceiver {
 	 * @param flight The flight map containing the flight information.
 	 * @return The created BookingReturn object.
 	 */
-	private BookingReturn createBookingFromFlightMapReturn(Map<String, Object> flight, String authorizationHeader) {
+	private BookingReturn createBookingFromFlightMapReturn(Map<String, Object> flight) {
 		BookingReturn bookingReturn = new BookingReturn();
 		bookingReturn.setTypeOfFlight(flight.get("Tipo de Voo").toString());
 		bookingReturn.setFlightNumber(flight.get("N. do Voo").toString());
