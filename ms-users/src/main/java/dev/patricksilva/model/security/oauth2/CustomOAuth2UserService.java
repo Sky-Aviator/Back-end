@@ -1,4 +1,4 @@
-package dev.patricksilva.model.security.oauth2;
+ package dev.patricksilva.model.security.oauth2;
 
 import java.util.Collections;
 import java.util.Optional;
