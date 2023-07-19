@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 
 import dev.patricksilva.model.dtos.UserDto;
+import dev.patricksilva.model.security.jwt.payload.request.LoginRequest;
 import dev.patricksilva.model.security.jwt.payload.request.UserRequest;
 
 public interface UserService {
@@ -89,4 +90,12 @@ public interface UserService {
 	 * @return the masked card CV
 	 */
 	String maskCv(String cardCv);
+
+	String checkId(String id);
+	
+	LoginRequest checkLoginEmailRequest(LoginRequest loginRequest);
+	
+	UserRequest checkUserEmailRequest(UserRequest userRequest);
+	
+	UserDto checkUserDtoEmail(UserDto userDto);
 }
