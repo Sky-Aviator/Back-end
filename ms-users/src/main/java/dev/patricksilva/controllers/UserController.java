@@ -1,7 +1,6 @@
 package dev.patricksilva.controllers;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +49,8 @@ public class UserController {
 	@Autowired
 	JwtUtils jwtUtils;	
 	
+	private static final String USER_NOT_FOUND = "Usuário com ID: %s não foi encontrado.";
+	
 	/**
 	 * Method responsible for authenticating the user.
 	 * 
@@ -58,16 +59,16 @@ public class UserController {
 	 */
 	@Operation(summary = "Realiza o Login do usuário.", description = "Realiza o login de um usuário passando só o email e a senha.")
 	@PostMapping("/login")
-	public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+	public ResponseEntity<JwtResponse> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+		userService.checkLoginEmailRequest(loginRequest);
+		
 		Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 		String jwt = jwtUtils.generateJwtToken(authentication);
 		UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();		
-		List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority()).collect(Collectors.toList());
+		List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority()).toList();
 
-		return (jwt != null && userDetails != null && roles != null)
-				? ResponseEntity.ok(new JwtResponse(jwt, userDetails.getId(), userDetails.getEmail(), roles))
-				: ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+		return (jwt != null && roles != null) ? ResponseEntity.ok(new JwtResponse(jwt, userDetails.getId(), userDetails.getEmail(), roles)) : ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 	}
 	
 	/**
@@ -75,15 +76,14 @@ public class UserController {
 	 * 
 	 * @return ResponseEntity<List<UserResponse>> - An HTTP response containing the list of users found.
 	 */
-	@Operation(summary = "Recupera todos os Usuário no sistema.", 
-	description = "Recupera todos os usuários no sistema. A resposta é o objeto usuário com: id, firstName, lastName, cpf, card, cardMonth, cardYear, cardCv, date, sex, phone, email.")
+	@Operation(summary = "Recupera todos os Usuário no sistema.", description = "Recupera todos os usuários no sistema. A resposta é o objeto usuário com: id, firstName, lastName, cpf, card, cardMonth, cardYear, cardCv, date, sex, phone, email.")
 	@GetMapping
 	public ResponseEntity<List<UserResponse>> findAllUsers() {
 		ModelMapper mapper = new ModelMapper();
 		List<UserDto> users = userService.findAll();
 		List<UserResponse> response = users.stream().map(u -> mapper.map(u, UserResponse.class)).toList();
 
-		return (response != null) ? new ResponseEntity<>(response, HttpStatus.OK) : ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+		return (response != null) ? new ResponseEntity<>(response, HttpStatus.OK) : ResponseEntity.status(HttpStatus.NO_CONTENT).build();
 	}
 
 	/**
@@ -97,6 +97,8 @@ public class UserController {
 	description = "Recupera um usuário passando como especificação o seu ID. A resposta é o objeto usuário com: id, firstName, lastName, cpf, card, cardMonth, cardYear, cardCv, date, sex, phone, email.")
 	@GetMapping("/{id}")
 	public ResponseEntity<UserResponse> findUserById(@Valid @PathVariable String id) {
+		userService.checkId(id);
+		
 		UserDto userDto = userService.findById(id);
 		if (userDto != null) {
 			ModelMapper mapper = new ModelMapper();
@@ -119,6 +121,8 @@ public class UserController {
 	description = "Recupera um cpf passando como especificação o ID de seu portador. A resposta é o cpf daquele usuário com máscara: 'cpf' : '***-***-***-XX'.")
 	@GetMapping("/{id}/cpf")
 	public String getUserCpf(@PathVariable String id) {
+		userService.checkId(id);
+		
 		UserDto userDto = userService.findById(id);
 
 		if (userDto != null) {
@@ -138,12 +142,14 @@ public class UserController {
 	description = "Recupera um cartão passando como especificação o ID de seu portador. A resposta é o cartão daquele usuário com máscara: 'card' : '****-****-****-XXXX'.")
 	@GetMapping("/{id}/card")
 	public String getUserCard(@PathVariable String id) {
+		userService.checkId(id);
+		
 		UserDto userDto = userService.findById(id);
 
 		if (userDto != null) {
 			return userDto.getCard();
 		}
-		throw new ResourceNotFoundException("Usuário com ID: " + id + " não foi encontrado.");
+		throw new ResourceNotFoundException(String.format(USER_NOT_FOUND, id));
 	}
 
 	/**
@@ -157,12 +163,14 @@ public class UserController {
 	description = "Recupera a data de expiração de um cartão passando como especificação o ID de seu portador. A resposta é a data de expiração do cartão daquele usuário: 'cardMonth + cardYear' : 'XX/YY'.")
 	@GetMapping("/{id}/cardExpiration")
 	public String getUserCardExpiration(@PathVariable String id) {
+		userService.checkId(id);
+		
 		UserDto userDto = userService.findById(id);
 
 		if (userDto != null) {
 			return userDto.getCardMonth() + "/" + userDto.getCardYear();
 		}
-		throw new ResourceNotFoundException("Usuário com ID: " + id + " não foi encontrado.");
+		throw new ResourceNotFoundException(String.format(USER_NOT_FOUND, id));
 	}
 
 	/**
@@ -175,6 +183,9 @@ public class UserController {
 	@Operation(summary = "Registra um novo Usuário.", description = "Faz o cadastro de um novo usuário no sistema.")
 	@PostMapping("/register")
 	public ResponseEntity<UserResponse> registerUser(@Valid @RequestBody UserDto userDto, UserRequest userRequest) {
+		userService.checkUserDtoEmail(userDto);
+		userService.checkUserEmailRequest(userRequest);
+		
 		ModelMapper mapper = new ModelMapper();
 		userService.addUser(userDto, userRequest);
 
@@ -192,6 +203,9 @@ public class UserController {
 	@Operation(summary = "Atualiza um Usuário por seu ID.", description = "Atualiza o cadastro de um Usuário por seu ID. A resposta são os campos escolhidos atualizados.: 'firstName':'João'.")
 	@PutMapping("/register/{id}")
 	public ResponseEntity<UserResponse> updateUser(@Valid @RequestBody UserRequest userRequest, @PathVariable String id) {
+		userService.checkId(id);
+		userService.checkUserEmailRequest(userRequest);
+		
 		ModelMapper mapper = new ModelMapper();
 		UserDto userDto = mapper.map(userRequest, UserDto.class);
 		userDto = userService.updateUser(id, userDto, userRequest);
@@ -210,6 +224,9 @@ public class UserController {
 	@Operation(summary = "Atualiza pacialmente um Usuário por seu ID.", description = "Atualiza parcialmente o cadastro de um Usuário por seu ID. A resposta são os campos escolhidos atualizados.: 'firstName':'João'.")
 	@PatchMapping("/register/{id}")
 	public ResponseEntity<UserDto> partialUpdateUser(@PathVariable("id") String id, @RequestBody @Valid UserDto userDto) {
+		userService.checkId(id);
+		userService.checkUserDtoEmail(userDto);
+		
 		UserDto updatedUser = userService.partialUpdate(id, userDto);
 		
 		return (updatedUser != null) ? ResponseEntity.ok(updatedUser) : ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -224,12 +241,14 @@ public class UserController {
 	@Operation(summary = "Deleta um Usuário por seu ID.", description = "Deleta de forma permanente o cadastro de um Usuário por seu ID. A resposta é: 'No Content'.")
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Void> deleteUser(@Valid @PathVariable String id) {
+		userService.checkId(id);
+
 		UserDto userDto = userService.findById(id);
 		if (userDto != null) {
 			userService.deleteUser(id);
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+			return new ResponseEntity<>(HttpStatus.OK);
 		}
-		
+
 		return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 	}
 }

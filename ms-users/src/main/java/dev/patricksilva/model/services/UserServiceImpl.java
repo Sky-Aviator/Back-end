@@ -23,6 +23,7 @@ import dev.patricksilva.model.exceptions.RoleNotFoundException;
 import dev.patricksilva.model.repository.RoleRepository;
 import dev.patricksilva.model.repository.UserRepository;
 import dev.patricksilva.model.security.encoders.Encoder;
+import dev.patricksilva.model.security.jwt.payload.request.LoginRequest;
 import dev.patricksilva.model.security.jwt.payload.request.UserRequest;
 import dev.patricksilva.model.security.jwt.payload.response.MessageResponse;
 import jakarta.validation.Valid;
@@ -314,5 +315,49 @@ public class UserServiceImpl implements UserService{
 	    user.setCardCv(maskCv(user.getCardCv()));
 	    
 	    return new ModelMapper().map(user, UserDto.class);
+	}
+	
+	/**
+	 * Method to check id's.
+	 * @param id
+	 */
+	public String checkId(String id) {
+		if (id.isEmpty() || id.isBlank()) {
+			return null;
+		}
+		return id;
+	}
+
+	/**
+	 * Method to check if email of login request is valid.
+	 * @param loginRequest
+	 */
+	public LoginRequest checkLoginEmailRequest(LoginRequest loginRequest) {
+		if (loginRequest.getEmail().isEmpty() || loginRequest.getEmail().isBlank()) {
+			return null;
+		}
+		return loginRequest;
+	}
+	
+	/**
+	 * Method to check if email of user request is valid.
+	 * @param userRequest
+	 */
+	public UserRequest checkUserEmailRequest(UserRequest userRequest) {
+		if (userRequest.getEmail().isEmpty() || userRequest.getEmail().isBlank()) {
+			return null;
+		}
+		return userRequest;
+	}
+	
+	/**
+	 * Method to check if userDto's email is valid.
+	 * @param userDto
+	 */
+	public UserDto checkUserDtoEmail(UserDto userDto) {
+		if(userDto.getEmail().isBlank() || userDto.getEmail().isEmpty()) {
+			return null;
+		}
+		return userDto;
 	}
 }
