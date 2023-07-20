@@ -184,7 +184,6 @@ public class UserController {
 	@PostMapping("/register")
 	public ResponseEntity<UserResponse> registerUser(@Valid @RequestBody UserDto userDto, UserRequest userRequest) {
 		userService.checkUserDtoEmail(userDto);
-		userService.checkUserEmailRequest(userRequest);
 		
 		ModelMapper mapper = new ModelMapper();
 		userService.addUser(userDto, userRequest);
@@ -225,7 +224,6 @@ public class UserController {
 	@PatchMapping("/register/{id}")
 	public ResponseEntity<UserDto> partialUpdateUser(@PathVariable("id") String id, @RequestBody @Valid UserDto userDto) {
 		userService.checkId(id);
-		userService.checkUserDtoEmail(userDto);
 		
 		UserDto updatedUser = userService.partialUpdate(id, userDto);
 		

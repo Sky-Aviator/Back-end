@@ -1,15 +1,12 @@
 package dev.patricksilva.model.services;
 
-import java.beans.PropertyDescriptor;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeanWrapperImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -40,6 +37,12 @@ public class UserServiceImpl implements UserService{
 	@Autowired
 	private RoleRepository roleRepository;
 
+	private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
+	
+	private static final String NON_EXISTENT_ID="Esse Id não existe, não foi possível encontrar o usuário com esse Id.";
+	
+	private static final String EXISTENTING_USER="O Usuário já existe no sistema!";
+	
 	/**
 	 * Retrieves all users present in the database.
 	 * 
@@ -79,7 +82,7 @@ public class UserServiceImpl implements UserService{
 	@Override
 	public ResponseEntity<?> addUser(@Valid UserDto userDto, UserRequest userRequest) {
 		if (userRepository.existsByEmail(userDto.getEmail())) {
-			throw new IllegalArgumentException("O Usuário já existe no sistema!");
+			logger.warn(EXISTENTING_USER);
 		}
 		ModelMapper mapper = new ModelMapper();
 		User user = mapper.map(userDto, User.class);
@@ -108,7 +111,7 @@ public class UserServiceImpl implements UserService{
 	@Override
 	public void deleteUser(@Valid String id) {
 		if (!userRepository.existsById(id)) {
-			throw new ResourceNotFoundException("Não pode deletar o Usuário com ID: " + id + ", pois o Usuário não existe!");
+			logger.warn(NON_EXISTENT_ID);
 		}
 		userRepository.deleteById(id);
 	}
@@ -124,7 +127,7 @@ public class UserServiceImpl implements UserService{
 	@Override
 	public UserDto updateUser(@Valid String id, UserDto userDto, UserRequest userRequest) {
 		if (!userRepository.existsById(id)) {
-			throw new ResourceNotFoundException("Nao pode atualizar o Usuário de ID: " + id + ", pois este Usuário não existe!");
+			logger.warn(NON_EXISTENT_ID);
 		}
 		userDto.setId(id);
 		ModelMapper mapper = new ModelMapper();
@@ -137,7 +140,7 @@ public class UserServiceImpl implements UserService{
 		user.setCard(encoder.encodeCard(user.getCard()));
 		user.setCardCv(encoder.encode(user.getCardCv()));
 		user.setRoles(getRolesFromRequest(userRequest));
-		
+	
 		userRepository.save(user);
 		
 		return userDto;
@@ -153,16 +156,17 @@ public class UserServiceImpl implements UserService{
 	 */
 	@Override
 	public UserDto partialUpdate(@Valid String id, UserDto userDto) {
-		if (!userRepository.existsById(id)) {
-			throw new ResourceNotFoundException("Não é possível atualizar o usuário com ID: " + id + ", porque o usuário não existe!");
+	    if (!userRepository.existsById(id)) {
+	        logger.warn(NON_EXISTENT_ID);
+	    }
+	    User existingUser = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Id: " + id + " não encontrado!"));
+		if (userDto.getEmail() != null) {
+			existingUser.setEmail(userDto.getEmail());
 		}
-		User existingUser = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Id: " + id + " não encontrado!"));
-		// Copy only non-null properties from userDto to existingUser.
-		BeanUtils.copyProperties(userDto, existingUser, getNullPropertyNames(userDto));
-		User updatedUser = userRepository.save(existingUser);
-		ModelMapper mapper = new ModelMapper();
-		
-		return mapper.map(updatedUser, UserDto.class);
+	    User updatedUser = userRepository.save(existingUser);
+	    ModelMapper mapper = new ModelMapper();
+
+	    return mapper.map(updatedUser, UserDto.class);
 	}
 	
 	/**
@@ -266,23 +270,19 @@ public class UserServiceImpl implements UserService{
 			roles.add(userRole);
 		} else {
 			strRoles.forEach(role -> {
-				
 				switch (role) {
 				case "admin":
-					Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN).orElseThrow(
-							() -> new RoleNotFoundException("Erro: Função " + ERole.ROLE_ADMIN + "não encontrada."));
+					Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN).orElseThrow(() -> new RoleNotFoundException("Erro: Função " + ERole.ROLE_ADMIN + "não encontrada."));
 					roles.add(adminRole);
 					break;
 
 				case "mod":
-					Role modRole = roleRepository.findByName(ERole.ROLE_MODERATOR)
-							.orElseThrow(() -> new RoleNotFoundException("Erro: Função " + ERole.ROLE_MODERATOR + "não encontrada."));
+					Role modRole = roleRepository.findByName(ERole.ROLE_MODERATOR).orElseThrow(() -> new RoleNotFoundException("Erro: Função " + ERole.ROLE_MODERATOR + "não encontrada."));
 					roles.add(modRole);
 					break;
 
 				default:
-					Role userRole = roleRepository.findByName(ERole.ROLE_USER)
-					.orElseThrow(() -> new RoleNotFoundException("Erro: Função " + ERole.ROLE_USER + "não encontrada."));
+					Role userRole = roleRepository.findByName(ERole.ROLE_USER).orElseThrow(() -> new RoleNotFoundException("Erro: Função " + ERole.ROLE_USER + "não encontrada."));
 					roles.add(userRole);
 				}
 			});
@@ -292,24 +292,15 @@ public class UserServiceImpl implements UserService{
 	}
 
 	/**
-	 * Retrieves the names of null properties from an object.
-	 * @param source - The source object.
-	 * @return String[] - An array of names of null properties.
+	 * Finds a user by their email address and returns the corresponding UserDto object.
+	 *
+	 * @param email The email address of the user to be found.
+	 * @return A UserDto object representing the user with the given email.
+	 * @throws ResourceNotFoundException if no user is found with the provided email.
 	 */
-	private String[] getNullPropertyNames(Object source) {
-		final BeanWrapper src = new BeanWrapperImpl(source);
-		PropertyDescriptor[] descriptors = src.getPropertyDescriptors();
-		List<String> nullProperties = Arrays.stream(descriptors)
-				.filter(descriptor -> src.getPropertyValue(descriptor.getName()) == null)
-				.map(PropertyDescriptor::getName).toList();
-
-		return nullProperties.toArray(new String[0]);
-	}
-
 	@Override
 	public UserDto findByEmail(String email) {
 	    UserDto user = userRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("E-mail: " + email + " não encontrado!"));
-	    // Apply the CPF and Card mask in the corresponding fields
 	    user.setCpf(maskCPF(user.getCpf()));
 	    user.setCard(maskCard(user.getCard()));
 	    user.setCardCv(maskCv(user.getCardCv()));
