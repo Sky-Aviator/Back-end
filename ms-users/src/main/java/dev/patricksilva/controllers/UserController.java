@@ -122,7 +122,6 @@ public class UserController {
 	@GetMapping("/{id}/cpf")
 	public String getUserCpf(@PathVariable String id) {
 		userService.checkId(id);
-		
 		UserDto userDto = userService.findById(id);
 
 		if (userDto != null) {
@@ -143,7 +142,6 @@ public class UserController {
 	@GetMapping("/{id}/card")
 	public String getUserCard(@PathVariable String id) {
 		userService.checkId(id);
-		
 		UserDto userDto = userService.findById(id);
 
 		if (userDto != null) {
@@ -164,7 +162,6 @@ public class UserController {
 	@GetMapping("/{id}/cardExpiration")
 	public String getUserCardExpiration(@PathVariable String id) {
 		userService.checkId(id);
-		
 		UserDto userDto = userService.findById(id);
 
 		if (userDto != null) {
@@ -184,7 +181,7 @@ public class UserController {
 	@PostMapping("/register")
 	public ResponseEntity<UserResponse> registerUser(@Valid @RequestBody UserDto userDto, UserRequest userRequest) {
 		userService.checkUserDtoEmail(userDto);
-		
+
 		ModelMapper mapper = new ModelMapper();
 		userService.addUser(userDto, userRequest);
 
@@ -224,7 +221,6 @@ public class UserController {
 	@PatchMapping("/register/{id}")
 	public ResponseEntity<UserDto> partialUpdateUser(@PathVariable("id") String id, @RequestBody @Valid UserDto userDto) {
 		userService.checkId(id);
-		
 		UserDto updatedUser = userService.partialUpdate(id, userDto);
 		
 		return (updatedUser != null) ? ResponseEntity.ok(updatedUser) : ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -240,7 +236,6 @@ public class UserController {
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Void> deleteUser(@Valid @PathVariable String id) {
 		userService.checkId(id);
-
 		UserDto userDto = userService.findById(id);
 		if (userDto != null) {
 			userService.deleteUser(id);

@@ -64,7 +64,8 @@ public class UserDetailsImpl implements UserDetails {
 
 	public static UserDetailsImpl build(UserDto userDto) {
 		List<GrantedAuthority> authorities = userDto.getRoles().stream()
-				.map(role -> new SimpleGrantedAuthority(role.getName().name())).collect(Collectors.toList());
+				.map(role -> new SimpleGrantedAuthority(role.getName().name()))
+				.collect(Collectors.toList());
 
 		return new UserDetailsImpl(userDto.getId(), userDto.getFirstName(), userDto.getLastName(), userDto.getEmail(),
 				userDto.getPassword(), authorities, userDto.getCard(), userDto.getCpf(), userDto.getPhone(),
@@ -173,15 +174,38 @@ public class UserDetailsImpl implements UserDetails {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (obj == null || getClass() != obj.getClass()) {
-			return false;
-		}
-		UserDetailsImpl user = (UserDetailsImpl) obj;
-
-		return Objects.equals(id, user.id);
+	public int hashCode() {
+		return Objects.hash(authorities, card, cardMonth, cardYear, cpf, email, firstName, id, lastName, password,
+				phone);
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		UserDetailsImpl other = (UserDetailsImpl) obj;
+		return Objects.equals(authorities, other.authorities) && Objects.equals(card, other.card)
+				&& Objects.equals(cardMonth, other.cardMonth) && Objects.equals(cardYear, other.cardYear)
+				&& Objects.equals(cpf, other.cpf) && Objects.equals(email, other.email)
+				&& Objects.equals(firstName, other.firstName) && Objects.equals(id, other.id)
+				&& Objects.equals(lastName, other.lastName) && Objects.equals(password, other.password)
+				&& Objects.equals(phone, other.phone);
+	}
+
+//	@Override
+//	public boolean equals(Object obj) {
+//		if (this == obj) {
+//			return true;
+//		}
+//		if (obj == null || getClass() != obj.getClass()) {
+//			return false;
+//		}
+//		UserDetailsImpl user = (UserDetailsImpl) obj;
+//
+//		return Objects.equals(id, user.id);
+//	}	
 }

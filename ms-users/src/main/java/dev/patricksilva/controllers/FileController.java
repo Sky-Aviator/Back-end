@@ -48,7 +48,7 @@ public class FileController {
 		User user = userRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
 		String fileId;
 		try {
-			fileId = fileService.addFile(file); // Adicionar o arquivo e obter seu identificador
+			fileId = fileService.addFile(file); // Adicionar o arquivo e obtem seu identificador
 		} catch (java.io.IOException e) {
 			throw new IOException("Erro ao adicionar o arquivo", e);
 		}

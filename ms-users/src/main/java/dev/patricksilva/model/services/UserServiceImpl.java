@@ -27,6 +27,11 @@ import jakarta.validation.Valid;
 
 @Service
 public class UserServiceImpl implements UserService{
+	private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
+	
+	private static final String NON_EXISTENT_ID="Esse Id não existe, não foi possível encontrar o usuário com esse Id.";
+	
+	private static final String EXISTENTING_USER="O Usuário já existe no sistema!";
 	
 	@Autowired
 	private Encoder encoder;
@@ -37,12 +42,6 @@ public class UserServiceImpl implements UserService{
 	@Autowired
 	private RoleRepository roleRepository;
 
-	private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
-	
-	private static final String NON_EXISTENT_ID="Esse Id não existe, não foi possível encontrar o usuário com esse Id.";
-	
-	private static final String EXISTENTING_USER="O Usuário já existe no sistema!";
-	
 	/**
 	 * Retrieves all users present in the database.
 	 * 
@@ -63,7 +62,7 @@ public class UserServiceImpl implements UserService{
 	 */
 	@Override
 	public UserDto findById(@Valid String id) {
-	    User user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Id: " + id + " não encontrado!"));
+	    User user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Id: " + id + "{} não encontrado!"));
 	    // Apply the CPF and Card mask in the corresponding fields
 	    user.setCpf(maskCPF(user.getCpf()));
 	    user.setCard(maskCard(user.getCard()));
@@ -310,6 +309,7 @@ public class UserServiceImpl implements UserService{
 	
 	/**
 	 * Method to check id's.
+	 * 
 	 * @param id
 	 */
 	public String checkId(String id) {
@@ -321,6 +321,7 @@ public class UserServiceImpl implements UserService{
 
 	/**
 	 * Method to check if email of login request is valid.
+	 * 
 	 * @param loginRequest
 	 */
 	public LoginRequest checkLoginEmailRequest(LoginRequest loginRequest) {
@@ -332,6 +333,7 @@ public class UserServiceImpl implements UserService{
 	
 	/**
 	 * Method to check if email of user request is valid.
+	 * 
 	 * @param userRequest
 	 */
 	public UserRequest checkUserEmailRequest(UserRequest userRequest) {
@@ -343,6 +345,7 @@ public class UserServiceImpl implements UserService{
 	
 	/**
 	 * Method to check if userDto's email is valid.
+	 * 
 	 * @param userDto
 	 */
 	public UserDto checkUserDtoEmail(UserDto userDto) {

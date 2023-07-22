@@ -1,4 +1,4 @@
- package dev.patricksilva.model.security.oauth2;
+package dev.patricksilva.model.security.oauth2;
 
 import java.util.Collections;
 import java.util.Optional;
@@ -8,7 +8,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
-import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
@@ -31,12 +30,12 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest oauthUserRequest) throws RuntimeException {
-        // Obtenha os detalhes do usuário do provedor OAuth2
+        // Obter os detalhes do usuário do provedor OAuth2
         OAuth2UserService<OAuth2UserRequest, OAuth2User> delegate = new DefaultOAuth2UserService();
         OAuth2User user = delegate.loadUser(oauthUserRequest);
         String email = user.getAttribute("email");
         String name = user.getAttribute("name");
-        String token = ((OAuth2AccessToken) oauthUserRequest.getAccessToken()).getTokenValue();
+        String token = (oauthUserRequest.getAccessToken()).getTokenValue();
 
         // Salvando as informações do usuário no banco de dados
 		Optional<UserDto> userEntityOptional = userRepository.findByEmail(email);
