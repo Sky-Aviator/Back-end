@@ -91,11 +91,35 @@ public interface UserService {
 	 */
 	String maskCv(String cardCv);
 
+	/**
+	 * Method responsible for checking the user id.
+	 * 
+	 * @param id
+	 * @return Id checked
+	 */
 	String checkId(String id);
 	
+	/**
+	 * Method responsible for checking the user's email from the login request.
+	 * 
+	 * @param loginRequest
+	 * @return User's email checked.
+	 */
 	LoginRequest checkLoginEmailRequest(LoginRequest loginRequest);
 	
+	/**
+	 * Method responsible for checking the user's email from the user request.
+	 * 
+	 * @param userRequest
+	 * @return User's email checked.
+	 */
 	UserRequest checkUserEmailRequest(UserRequest userRequest);
-	
+
+	/**
+	 * Method responsible for checking the user's email from the user dto.
+	 * 
+	 * @param userDto
+	 * @return User's email checked.
+	 */
 	UserDto checkUserDtoEmail(UserDto userDto);
 }

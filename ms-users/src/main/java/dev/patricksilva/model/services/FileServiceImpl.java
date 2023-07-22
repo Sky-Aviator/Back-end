@@ -39,8 +39,7 @@ public class FileServiceImpl implements FileService {
 
 		metadata.put("fileSize", upload.getSize());
 
-		Object fileID = template.store(upload.getInputStream(), upload.getOriginalFilename(), upload.getContentType(),
-				metadata);
+		Object fileID = template.store(upload.getInputStream(), upload.getOriginalFilename(), upload.getContentType(), metadata);
 
 		return fileID.toString();
 	}

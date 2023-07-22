@@ -7,7 +7,6 @@ import org.springframework.context.annotation.PropertySource;
 @SpringBootApplication
 @PropertySource("file:/home/anon/Desktop/config.properties")
 public class MsUsersApplication {
-
 	public static void main(String[] args) {
 		SpringApplication.run(MsUsersApplication.class, args);
 	}

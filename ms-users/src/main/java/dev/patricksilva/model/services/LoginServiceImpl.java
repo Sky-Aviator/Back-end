@@ -23,11 +23,19 @@ public class LoginServiceImpl implements LoginService {
 	@Override
 	public String getUserInformationByToken(HttpHeaders headers, String secret, InformationType type) {
 		String token = headers.getFirst("Authorization"); // Obter o token nos headers
+		if(token == null) {
+			return null;
+		}
+		
 		String jwt = token.replace("Bearer ", ""); // Remover o prefixo "Bearer"
+		if(jwt == null) {
+			return null;
+		}
 
 		Claims claims = Jwts.parserBuilder().setSigningKey(secret.getBytes(StandardCharsets.UTF_8)).build().parseClaimsJws(jwt).getBody();
 
 		switch (type) {
+		
 		case ID:
 			return "id: " + claims.get("id", String.class);
 		case CARD:

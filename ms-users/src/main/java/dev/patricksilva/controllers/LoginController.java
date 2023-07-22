@@ -27,6 +27,12 @@ public class LoginController {
     @Autowired
     private LoginService loginService;
 
+    /**
+     * Retrieves user board information from the API.
+     * This endpoint requires the user to have the 'ROLE_USER' role to access it.
+     *
+     * @return A ResponseEntity containing a String with the message "User board" and an HTTP status of 200 (OK).
+     */
     @GetMapping("/api/v1/userboard")
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<String> userBoard(){

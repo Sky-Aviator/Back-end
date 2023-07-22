@@ -7,16 +7,27 @@ package dev.patricksilva.view;
  */
 public class UserResponse {
 	private String id;
+	
 	private String firstName;
+	
 	private String lastName;
+	
 	private String cpf;
+	
 	private String card;
+	
 	private String cardMonth;
+	
 	private String cardYear;
+	
 	private String cardCv;
+	
 	private String date;
+	
 	private String sex;
+	
 	private String phone;
+	
 	private String email;
 
 	// Getters and Setters
